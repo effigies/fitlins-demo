@@ -1,0 +1,257 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>What’s new &#8212; FitLins  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/example_gallery_styles.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Support" href="support.html" />
+    <link rel="prev" title="Walk-through FitLins Analysis" href="examples/notebooks/ds003_sample_analysis.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="what-s-new">
+<h1>What’s new<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="may-10-2019">
+<h2>0.4.0 (May 10, 2019)<a class="headerlink" href="#may-10-2019" title="Permalink to this headline">¶</a></h2>
+<p>This release produces effect, variance, statistic (t or F), Z-score, and p-value
+maps at every level, and enables smoothing at higher levels if preferred.</p>
+<p>Additionally, documentation has been added at <a class="reference external" href="https://fitlins.readthedocs.io">https://fitlins.readthedocs.io</a> and
+versioning/packaging issues have been resolved.</p>
+<ul class="simple">
+<li><p>FIX: Do not install FitLins as editable in Docker (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/137">https://github.com/poldracklab/fitlins/pull/137</a>)</p></li>
+<li><p>ENH: Save design matrix as TSV to output directory (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/143">https://github.com/poldracklab/fitlins/pull/143</a>)</p></li>
+<li><p>ENH: Enable smoothing at any analysis level (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/135">https://github.com/poldracklab/fitlins/pull/135</a>)</p></li>
+<li><p>ENH: Produce all available statistical maps from each analysis unit (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/131">https://github.com/poldracklab/fitlins/pull/131</a>)</p></li>
+<li><p>ENH: Add version to non-release Docker images. (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/136">https://github.com/poldracklab/fitlins/pull/136</a>)</p></li>
+<li><p>DOC: Flesh out documentation (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/147">https://github.com/poldracklab/fitlins/pull/147</a>)</p></li>
+<li><p>DOC: Build API docs on RTD (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/146">https://github.com/poldracklab/fitlins/pull/146</a>)</p></li>
+<li><p>DOC: Create Sphinx documentation with API autodocs (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/145">https://github.com/poldracklab/fitlins/pull/145</a>)</p></li>
+<li><p>MAINT: Drop Python 3.5 support (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/140">https://github.com/poldracklab/fitlins/pull/140</a>)</p></li>
+<li><p>CI: Run FitLins with coverage (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/144">https://github.com/poldracklab/fitlins/pull/144</a>)</p></li>
+<li><p>CI: Test FitLins on OpenNeuro DS000003, preprocessed with fMRIPrep 1.3.2 (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/141">https://github.com/poldracklab/fitlins/pull/141</a>)</p></li>
+</ul>
+</div>
+<div class="section" id="april-19-2019">
+<h2>0.3.0 (April 19, 2019)<a class="headerlink" href="#april-19-2019" title="Permalink to this headline">¶</a></h2>
+<p>This release restores reports at the second level and higher, and enables isotropic
+smoothing with the nistats backend. Reporting has also been refactored to reduce
+clutter in the outputs.</p>
+<p>With thanks to Karolina Finc, Rastko Ciric and Mathias Goncalves for contributions.</p>
+<ul class="simple">
+<li><p>FIX: Restore level 2+ reports (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/130">https://github.com/poldracklab/fitlins/pull/130</a>)</p></li>
+<li><p>FIX: Remove uninformative metadata from derivative filenames (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/129">https://github.com/poldracklab/fitlins/pull/129</a>)</p></li>
+<li><p>FIX: Re-enable analysis level selection (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/120">https://github.com/poldracklab/fitlins/pull/120</a>)</p></li>
+<li><p>FIX: Switch plot colors to conventional blue for negative, red for positive (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/108">https://github.com/poldracklab/fitlins/pull/108</a>)</p></li>
+<li><p>ENH: Save crashfiles as text in working directory (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/121">https://github.com/poldracklab/fitlins/pull/121</a>)</p></li>
+<li><p>ENH: Add naive isotropic smoothing (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/104">https://github.com/poldracklab/fitlins/pull/104</a>)</p></li>
+<li><p>REF: Delegate isotropic smoothing to nistats (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/118">https://github.com/poldracklab/fitlins/pull/118</a>)</p></li>
+<li><p>DOC: Update README with latest help text, remove smoothing disclaimer (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/119">https://github.com/poldracklab/fitlins/pull/119</a>)</p></li>
+<li><p>MAINT: Add contributors to Zenodo (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/122">https://github.com/poldracklab/fitlins/pull/122</a>)</p></li>
+<li><p>MAINT: Consolidate configuration (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/113">https://github.com/poldracklab/fitlins/pull/113</a>)</p></li>
+<li><p>MAINT: Pybids 0.8 compatibility (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/109">https://github.com/poldracklab/fitlins/pull/109</a>)</p></li>
+<li><p>MAINT: Use numpy 1.15 to accommodate pytables (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/106">https://github.com/poldracklab/fitlins/pull/106</a>)</p></li>
+</ul>
+</div>
+<div class="section" id="february-1-2019">
+<h2>0.2.0 (February 1, 2019)<a class="headerlink" href="#february-1-2019" title="Permalink to this headline">¶</a></h2>
+<p>This release marks a substantial refactoring in the wake of
+<a class="reference external" href="https://docs.google.com/document/d/17ebopupQxuRwp7U7TFvS6BH03ALJOgGHufxK8ToAvyI/">BIDS Derivatives RC1</a>,
+<a class="reference external" href="https://fmriprep.readthedocs.io/en/stable/changes.html#january-17-2019">fMRIPrep 1.2.x</a> and
+<a class="reference external" href="https://github.com/bids-standard/pybids/releases/tag/0.7.0">pybids 0.7.0</a>.</p>
+<p>Reports at second level and higher are currently broken, but we’re at a point where neuroscout
+is depending on the current code base, the user base is increasing, and it’s worth having a starting
+point for considering new features.</p>
+<p>With thanks to Alejandro de la Vega, Adina Wagner and Yaroslav Halchenko for contributions.</p>
+<ul class="simple">
+<li><p>FIX: Allow derivatives to be a boolean value (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/91">https://github.com/poldracklab/fitlins/pull/91</a>)</p></li>
+<li><p>FIX: Restore report generation (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/88">https://github.com/poldracklab/fitlins/pull/88</a>)</p></li>
+<li><p>ENH: Plotting improvements (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/89">https://github.com/poldracklab/fitlins/pull/89</a>)</p></li>
+<li><p>ENH: Allow selecting for no space <code class="docutils literal notranslate"><span class="pre">--space</span> <span class="pre">''</span></code> option (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/96">https://github.com/poldracklab/fitlins/pull/96</a>)</p></li>
+<li><p>ENH: Allow selecting for desc with <code class="docutils literal notranslate"><span class="pre">--desc</span></code> option (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/95">https://github.com/poldracklab/fitlins/pull/95</a>)</p></li>
+<li><p>MAINT: Depend on unreleased pybids commit (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/99">https://github.com/poldracklab/fitlins/pull/99</a>)</p></li>
+<li><p>MAINT: Pybids 0.7.0 compatibility (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/84">https://github.com/poldracklab/fitlins/pull/84</a>)</p></li>
+</ul>
+</div>
+<div class="section" id="august-24-2018">
+<h2>0.1.0 (August 24, 2018)<a class="headerlink" href="#august-24-2018" title="Permalink to this headline">¶</a></h2>
+<p>This release moves FitLins to a Nipype workflow and provides a set of Nipype interfaces for interacting with BIDS Models and the nistats statistical package.</p>
+<ul class="simple">
+<li><p>FIX: Correctly handle missing confounds (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/73">https://github.com/poldracklab/fitlins/pull/73</a>)</p></li>
+<li><p>ENH: Set loop_preproc during model loading (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/66">https://github.com/poldracklab/fitlins/pull/66</a>)</p></li>
+<li><p>REF: Second-level workflow (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/30">https://github.com/poldracklab/fitlins/pull/30</a>)</p></li>
+<li><p>DOC: Example model (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/63">https://github.com/poldracklab/fitlins/pull/63</a>)</p></li>
+<li><p>MAINT: Update nipype, grabbit and pybids dependencies (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/70">https://github.com/poldracklab/fitlins/pull/70</a>)</p></li>
+</ul>
+</div>
+<div class="section" id="august-06-2018">
+<h2>0.0.6 (August 06, 2018)<a class="headerlink" href="#august-06-2018" title="Permalink to this headline">¶</a></h2>
+<p>Hotfix release.</p>
+<ul class="simple">
+<li><p>FIX: Explicitly create working directory (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/61">https://github.com/poldracklab/fitlins/pull/61</a>)</p></li>
+</ul>
+</div>
+<div class="section" id="august-01-2018">
+<h2>0.0.5 (August 01, 2018)<a class="headerlink" href="#august-01-2018" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>FIX: Limit NaN imputation and use mean non-zero value (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/57">https://github.com/poldracklab/fitlins/pull/57</a>)</p></li>
+</ul>
+</div>
+<div class="section" id="july-05-2018">
+<h2>0.0.4 (July 05, 2018)<a class="headerlink" href="#july-05-2018" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ENH: Allow models without non-HRF variables (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/55">https://github.com/poldracklab/fitlins/pull/55</a>)</p></li>
+<li><p>ENH: Make dataset_description optional (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/51">https://github.com/poldracklab/fitlins/pull/51</a>)</p></li>
+<li><p>ENH: Loop over preproc files, instead of raw BOLD files (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/50">https://github.com/poldracklab/fitlins/pull/50</a>)</p></li>
+<li><p>ENH: Add –n-cpus option to CLI (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/49">https://github.com/poldracklab/fitlins/pull/49</a>)</p></li>
+<li><p>ENH: Run datasinks on main thread (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/39">https://github.com/poldracklab/fitlins/pull/39</a>)</p></li>
+<li><p>ENH: Enable derivative label to tag pipelines (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/37">https://github.com/poldracklab/fitlins/pull/37</a>)</p></li>
+<li><p>ENH: Make dataset description (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/29">https://github.com/poldracklab/fitlins/pull/29</a>)</p></li>
+<li><p>ENH: Add trivial dataset_description.json (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/31">https://github.com/poldracklab/fitlins/pull/31</a>)</p></li>
+<li><p>ENH: Run auto model by default (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/26">https://github.com/poldracklab/fitlins/pull/26</a>)</p></li>
+<li><p>ENH: Rewrite first level analysis as Nipype workflow (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/16">https://github.com/poldracklab/fitlins/pull/16</a>)</p></li>
+<li><p>ENH: Add acq, rec, run and echo to output patterns (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/20">https://github.com/poldracklab/fitlins/pull/20</a>)</p></li>
+<li><p>FIX: Second level contrast computation, and dense/sparse transformation issues (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/48">https://github.com/poldracklab/fitlins/pull/48</a>)</p></li>
+<li><p>FIX: Include run in derivative names (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/43">https://github.com/poldracklab/fitlins/pull/43</a>)</p></li>
+<li><p>FIX: Force string input to snake_to_camel (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/41">https://github.com/poldracklab/fitlins/pull/41</a>)</p></li>
+<li><p>FIX: Versioneer adjustments (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/36">https://github.com/poldracklab/fitlins/pull/36</a>)</p></li>
+<li><p>FIX: Create group level results dir (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/22">https://github.com/poldracklab/fitlins/pull/22</a>)</p></li>
+<li><p>RF: Simplify entry-points, restore preproc discovery (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/38">https://github.com/poldracklab/fitlins/pull/38</a>)</p></li>
+<li><p>MAINT: Update pybids 0.6.3, grabbit 0.2.1 (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/52">https://github.com/poldracklab/fitlins/pull/52</a>)</p></li>
+<li><p>MAINT: Manage version with versioneer (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/35">https://github.com/poldracklab/fitlins/pull/35</a>)</p></li>
+<li><p>MAINT: Neuroscout changes / pybids updates (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/28">https://github.com/poldracklab/fitlins/pull/28</a>)</p></li>
+<li><p>MAINT: Add nipype dependency, remove unused code (<a class="reference external" href="https://github.com/poldracklab/fitlins/pull/27">https://github.com/poldracklab/fitlins/pull/27</a>)</p></li>
+</ul>
+</div>
+<div class="section" id="march-9-2018">
+<h2>0.0.3 (March 9, 2018)<a class="headerlink" href="#march-9-2018" title="Permalink to this headline">¶</a></h2>
+<p>Maintenance release</p>
+<ul class="simple">
+<li><p>Update grabbit (0.1.1), pybids (0.5.0) (#11)</p></li>
+<li><p>Incorporate nistats/nistats#165 (#13)</p></li>
+<li><p>Update Dockerfile, versioning (#14)</p></li>
+</ul>
+</div>
+<div class="section" id="march-5-2018">
+<h2>0.0.2 (March 5, 2018)<a class="headerlink" href="#march-5-2018" title="Permalink to this headline">¶</a></h2>
+<p>Hotfix, addressing deployment issues.</p>
+</div>
+<div class="section" id="id1">
+<h2>0.0.1 (March 5, 2018)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>Initial release of FitLins, a BIDS-model fitting BIDS app.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">FitLins</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">BIDS Stats Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">What’s new</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#may-10-2019">0.4.0 (May 10, 2019)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#april-19-2019">0.3.0 (April 19, 2019)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#february-1-2019">0.2.0 (February 1, 2019)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#august-24-2018">0.1.0 (August 24, 2018)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#august-06-2018">0.0.6 (August 06, 2018)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#august-01-2018">0.0.5 (August 01, 2018)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#july-05-2018">0.0.4 (July 05, 2018)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#march-9-2018">0.0.3 (March 9, 2018)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#march-5-2018">0.0.2 (March 5, 2018)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">0.0.1 (March 5, 2018)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing FitLins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="examples/notebooks/ds003_sample_analysis.html" title="previous chapter">Walk-through FitLins Analysis</a></li>
+      <li>Next: <a href="support.html" title="next chapter">Support</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Center for Reproducible Neuroscience.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/changes.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

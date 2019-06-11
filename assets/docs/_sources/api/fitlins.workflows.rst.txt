@@ -1,0 +1,18 @@
+fitlins.workflows package
+=========================
+
+Submodules
+----------
+
+.. toctree::
+
+   fitlins.workflows.base
+   fitlins.workflows.fsl
+
+Module contents
+---------------
+
+.. automodule:: fitlins.workflows
+    :members:
+    :undoc-members:
+    :show-inheritance:

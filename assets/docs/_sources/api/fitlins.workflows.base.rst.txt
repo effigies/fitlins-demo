@@ -1,0 +1,7 @@
+fitlins.workflows.base module
+=============================
+
+.. automodule:: fitlins.workflows.base
+    :members:
+    :undoc-members:
+    :show-inheritance:

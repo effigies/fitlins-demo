@@ -1,0 +1,19 @@
+fitlins.viz package
+===================
+
+Submodules
+----------
+
+.. toctree::
+
+   fitlins.viz.contrasts
+   fitlins.viz.corr
+   fitlins.viz.reports
+
+Module contents
+---------------
+
+.. automodule:: fitlins.viz
+    :members:
+    :undoc-members:
+    :show-inheritance:

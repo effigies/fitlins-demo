@@ -1,0 +1,21 @@
+fitlins package
+===============
+
+Subpackages
+-----------
+
+.. toctree::
+
+    fitlins.cli
+    fitlins.interfaces
+    fitlins.utils
+    fitlins.viz
+    fitlins.workflows
+
+Module contents
+---------------
+
+.. automodule:: fitlins
+    :members:
+    :undoc-members:
+    :show-inheritance:

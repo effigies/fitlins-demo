@@ -1,0 +1,309 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>fitlins.interfaces.bids module &#8212; FitLins  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/example_gallery_styles.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="fitlins.interfaces.fsl2 module" href="fitlins.interfaces.fsl2.html" />
+    <link rel="prev" title="fitlins.interfaces package" href="fitlins.interfaces.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-fitlins.interfaces.bids">
+<span id="fitlins-interfaces-bids-module"></span><h1>fitlins.interfaces.bids module<a class="headerlink" href="#module-fitlins.interfaces.bids" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="fitlins.interfaces.bids.BIDSDataSink">
+<em class="property">class </em><code class="descclassname">fitlins.interfaces.bids.</code><code class="descname">BIDSDataSink</code><span class="sig-paren">(</span><em>from_file=None</em>, <em>resource_monitor=None</em>, <em>ignore_exception=False</em>, <em>**inputs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/interfaces/bids.html#BIDSDataSink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.interfaces.bids.BIDSDataSink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.io.IOBase</span></code></p>
+<dl class="attribute">
+<dt id="fitlins.interfaces.bids.BIDSDataSink.input_spec">
+<code class="descname">input_spec</code><a class="headerlink" href="#fitlins.interfaces.bids.BIDSDataSink.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#fitlins.interfaces.bids.BIDSDataSinkInputSpec" title="fitlins.interfaces.bids.BIDSDataSinkInputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">BIDSDataSinkInputSpec</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fitlins.interfaces.bids.BIDSDataSink.output_spec">
+<code class="descname">output_spec</code><a class="headerlink" href="#fitlins.interfaces.bids.BIDSDataSink.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#fitlins.interfaces.bids.BIDSDataSinkOutputSpec" title="fitlins.interfaces.bids.BIDSDataSinkOutputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">BIDSDataSinkOutputSpec</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fitlins.interfaces.bids.BIDSDataSinkInputSpec">
+<em class="property">class </em><code class="descclassname">fitlins.interfaces.bids.</code><code class="descname">BIDSDataSinkInputSpec</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/interfaces/bids.html#BIDSDataSinkInputSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.interfaces.bids.BIDSDataSinkInputSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.specs.BaseInterfaceInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="fitlins.interfaces.bids.BIDSDataSinkOutputSpec">
+<em class="property">class </em><code class="descclassname">fitlins.interfaces.bids.</code><code class="descname">BIDSDataSinkOutputSpec</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/interfaces/bids.html#BIDSDataSinkOutputSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.interfaces.bids.BIDSDataSinkOutputSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.specs.TraitedSpec</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="fitlins.interfaces.bids.BIDSSelect">
+<em class="property">class </em><code class="descclassname">fitlins.interfaces.bids.</code><code class="descname">BIDSSelect</code><span class="sig-paren">(</span><em>from_file=None</em>, <em>resource_monitor=None</em>, <em>**inputs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/interfaces/bids.html#BIDSSelect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.interfaces.bids.BIDSSelect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<dl class="attribute">
+<dt id="fitlins.interfaces.bids.BIDSSelect.input_spec">
+<code class="descname">input_spec</code><a class="headerlink" href="#fitlins.interfaces.bids.BIDSSelect.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#fitlins.interfaces.bids.BIDSSelectInputSpec" title="fitlins.interfaces.bids.BIDSSelectInputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">BIDSSelectInputSpec</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fitlins.interfaces.bids.BIDSSelect.output_spec">
+<code class="descname">output_spec</code><a class="headerlink" href="#fitlins.interfaces.bids.BIDSSelect.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#fitlins.interfaces.bids.BIDSSelectOutputSpec" title="fitlins.interfaces.bids.BIDSSelectOutputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">BIDSSelectOutputSpec</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fitlins.interfaces.bids.BIDSSelectInputSpec">
+<em class="property">class </em><code class="descclassname">fitlins.interfaces.bids.</code><code class="descname">BIDSSelectInputSpec</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/interfaces/bids.html#BIDSSelectInputSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.interfaces.bids.BIDSSelectInputSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.specs.BaseInterfaceInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="fitlins.interfaces.bids.BIDSSelectOutputSpec">
+<em class="property">class </em><code class="descclassname">fitlins.interfaces.bids.</code><code class="descname">BIDSSelectOutputSpec</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/interfaces/bids.html#BIDSSelectOutputSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.interfaces.bids.BIDSSelectOutputSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.specs.TraitedSpec</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="fitlins.interfaces.bids.LoadBIDSModel">
+<em class="property">class </em><code class="descclassname">fitlins.interfaces.bids.</code><code class="descname">LoadBIDSModel</code><span class="sig-paren">(</span><em>from_file=None</em>, <em>resource_monitor=None</em>, <em>**inputs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/interfaces/bids.html#LoadBIDSModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.interfaces.bids.LoadBIDSModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Read a BIDS dataset and model and produce configurations that may be
+adapted to various model-fitting packages.</p>
+<dl>
+<dt>design_info<span class="classifier">list of dictionaries</span></dt><dd><dl>
+<dt>At the first level, a dictionary per-run containing the following keys:</dt><dd><dl class="simple">
+<dt>‘sparse’<span class="classifier">HDF5 file containing sparse representation of events</span></dt><dd><p>(onset, duration, amplitude)</p>
+</dd>
+<dt>‘dense’<span class="classifier">HDF5 file containing dense representation of events</span></dt><dd><p>regressors</p>
+</dd>
+</dl>
+<p>‘repetition_time’   : float (in seconds)</p>
+</dd>
+</dl>
+</dd>
+<dt>entities<span class="classifier">list of list of dictionaries</span></dt><dd><p>The entities list contains a list for each level of analysis.
+At each level, the list contains a dictionary of entities that apply to each
+unit of analysis. For example, if the first level is “Run” and there are 20
+runs in the dataset, the first entry will be a list of 20 dictionaries, each
+uniquely identifying a run.</p>
+</dd>
+<dt>contrast_info<span class="classifier">list of lists of files</span></dt><dd><p>A list of contrast specifications at each unit of analysis; hence a list of
+dictionaries for each entity dictionary.
+A contrast specification is a list of contrast dictionaries
+Each dictionary has form:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>{</dt><dd><p>‘entities’: dict,
+‘name’: str,
+‘type’: ‘t’ or ‘F’,
+‘weights’: dict</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>The entities dictionary is a subset of the corresponding dictionary in the entities
+output.
+The weights dictionary is a mapping from design matrix column names to floats.</p>
+</dd>
+<dt>warnings<span class="classifier">list of files</span></dt><dd><p>Files containing HTML snippets with any warnings produced while processing the first
+level.</p>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="fitlins.interfaces.bids.LoadBIDSModel.input_spec">
+<code class="descname">input_spec</code><a class="headerlink" href="#fitlins.interfaces.bids.LoadBIDSModel.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#fitlins.interfaces.bids.LoadBIDSModelInputSpec" title="fitlins.interfaces.bids.LoadBIDSModelInputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">LoadBIDSModelInputSpec</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fitlins.interfaces.bids.LoadBIDSModel.output_spec">
+<code class="descname">output_spec</code><a class="headerlink" href="#fitlins.interfaces.bids.LoadBIDSModel.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#fitlins.interfaces.bids.LoadBIDSModelOutputSpec" title="fitlins.interfaces.bids.LoadBIDSModelOutputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">LoadBIDSModelOutputSpec</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fitlins.interfaces.bids.LoadBIDSModelInputSpec">
+<em class="property">class </em><code class="descclassname">fitlins.interfaces.bids.</code><code class="descname">LoadBIDSModelInputSpec</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/interfaces/bids.html#LoadBIDSModelInputSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.interfaces.bids.LoadBIDSModelInputSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.specs.BaseInterfaceInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="fitlins.interfaces.bids.LoadBIDSModelOutputSpec">
+<em class="property">class </em><code class="descclassname">fitlins.interfaces.bids.</code><code class="descname">LoadBIDSModelOutputSpec</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/interfaces/bids.html#LoadBIDSModelOutputSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.interfaces.bids.LoadBIDSModelOutputSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.specs.TraitedSpec</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="fitlins.interfaces.bids.ModelSpecLoader">
+<em class="property">class </em><code class="descclassname">fitlins.interfaces.bids.</code><code class="descname">ModelSpecLoader</code><span class="sig-paren">(</span><em>from_file=None</em>, <em>resource_monitor=None</em>, <em>**inputs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/interfaces/bids.html#ModelSpecLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.interfaces.bids.ModelSpecLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Load BIDS Stats Models specifications from a BIDS directory</p>
+<dl class="attribute">
+<dt id="fitlins.interfaces.bids.ModelSpecLoader.input_spec">
+<code class="descname">input_spec</code><a class="headerlink" href="#fitlins.interfaces.bids.ModelSpecLoader.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#fitlins.interfaces.bids.ModelSpecLoaderInputSpec" title="fitlins.interfaces.bids.ModelSpecLoaderInputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelSpecLoaderInputSpec</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fitlins.interfaces.bids.ModelSpecLoader.output_spec">
+<code class="descname">output_spec</code><a class="headerlink" href="#fitlins.interfaces.bids.ModelSpecLoader.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#fitlins.interfaces.bids.ModelSpecLoaderOutputSpec" title="fitlins.interfaces.bids.ModelSpecLoaderOutputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelSpecLoaderOutputSpec</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fitlins.interfaces.bids.ModelSpecLoaderInputSpec">
+<em class="property">class </em><code class="descclassname">fitlins.interfaces.bids.</code><code class="descname">ModelSpecLoaderInputSpec</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/interfaces/bids.html#ModelSpecLoaderInputSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.interfaces.bids.ModelSpecLoaderInputSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.specs.BaseInterfaceInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="fitlins.interfaces.bids.ModelSpecLoaderOutputSpec">
+<em class="property">class </em><code class="descclassname">fitlins.interfaces.bids.</code><code class="descname">ModelSpecLoaderOutputSpec</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/interfaces/bids.html#ModelSpecLoaderOutputSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.interfaces.bids.ModelSpecLoaderOutputSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.specs.TraitedSpec</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fitlins.interfaces.bids.bids_split_filename">
+<code class="descclassname">fitlins.interfaces.bids.</code><code class="descname">bids_split_filename</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/interfaces/bids.html#bids_split_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.interfaces.bids.bids_split_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split a filename into parts: path, base filename, and extension</p>
+<p>Respects multi-part file types used in BIDS standard and draft extensions</p>
+<p>Largely copied from nipype.utils.filemanip.split_filename</p>
+<dl class="simple">
+<dt>fname<span class="classifier">str</span></dt><dd><p>file or path name</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>pth<span class="classifier">str</span></dt><dd><p>path of fname</p>
+</dd>
+<dt>fname<span class="classifier">str</span></dt><dd><p>basename of filename, without extension</p>
+</dd>
+<dt>ext<span class="classifier">str</span></dt><dd><p>file extension of fname</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">FitLins</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model.html">BIDS Stats Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing FitLins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="fitlins.html">fitlins package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">API</a><ul>
+  <li><a href="fitlins.html">fitlins package</a><ul>
+  <li><a href="fitlins.interfaces.html">fitlins.interfaces package</a><ul>
+      <li>Previous: <a href="fitlins.interfaces.html" title="previous chapter">fitlins.interfaces package</a></li>
+      <li>Next: <a href="fitlins.interfaces.fsl2.html" title="next chapter">fitlins.interfaces.fsl2 module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Center for Reproducible Neuroscience.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/fitlins.interfaces.bids.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

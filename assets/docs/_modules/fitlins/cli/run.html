@@ -1,0 +1,337 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>fitlins.cli.run &#8212; FitLins  documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/example_gallery_styles.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for fitlins.cli.run</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">fMRI model-fitting</span>
+<span class="sd">==================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">op</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="k">import</span> <span class="n">mkdtemp</span>
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="k">import</span> <span class="n">ArgumentParser</span>
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="k">import</span> <span class="n">RawTextHelpFormatter</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">cpu_count</span>
+
+<span class="kn">from</span> <span class="nn">bids.layout</span> <span class="k">import</span> <span class="n">BIDSLayout</span>
+<span class="kn">from</span> <span class="nn">bids.analysis</span> <span class="k">import</span> <span class="n">auto_model</span><span class="p">,</span> <span class="n">Analysis</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">__version__</span>
+<span class="kn">from</span> <span class="nn">..workflows</span> <span class="k">import</span> <span class="n">init_fitlins_wf</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="k">import</span> <span class="n">bids</span>
+<span class="kn">from</span> <span class="nn">..viz.reports</span> <span class="k">import</span> <span class="n">build_report_dict</span><span class="p">,</span> <span class="n">write_full_report</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">addLevelName</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="s1">&#39;INFO&#39;</span><span class="p">)</span>  <span class="c1"># Add a new level between INFO and WARNING</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;cli&#39;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+
+<span class="n">INIT_MSG</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">Running FitLins version </span><span class="si">{version}</span><span class="s2">:</span>
+<span class="s2">  * Participant list: </span><span class="si">{subject_list}</span><span class="s2">.</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span>
+
+
+<span class="k">def</span> <span class="nf">_warn_redirect</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Captured warning (</span><span class="si">%s</span><span class="s1">): </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="default_path"><a class="viewcode-back" href="../../../api/fitlins.cli.run.html#fitlins.cli.run.default_path">[docs]</a><span class="k">def</span> <span class="nf">default_path</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">,</span> <span class="n">default_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate absolute path from absolute, relative, or missing path</span>
+
+<span class="sd">    Missing paths are given a default value, which may be absolute or relative,</span>
+<span class="sd">    and relative paths are resolved relative to a base directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">default_name</span> <span class="k">if</span> <span class="n">arg</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">arg</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">op</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+
+<div class="viewcode-block" id="get_parser"><a class="viewcode-back" href="../../../api/fitlins.cli.run.html#fitlins.cli.run.get_parser">[docs]</a><span class="k">def</span> <span class="nf">get_parser</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Build parser object&quot;&quot;&quot;</span>
+    <span class="n">verstr</span> <span class="o">=</span> <span class="s1">&#39;fitlins v</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__version__</span><span class="p">)</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;FitLins: Workflows for Fitting Linear models to fMRI&#39;</span><span class="p">,</span>
+                            <span class="n">formatter_class</span><span class="o">=</span><span class="n">RawTextHelpFormatter</span><span class="p">)</span>
+
+    <span class="c1"># Arguments as specified by BIDS-Apps</span>
+    <span class="c1"># required, positional arguments</span>
+    <span class="c1"># IMPORTANT: they must go directly with the parser object</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;bids_dir&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">op</span><span class="o">.</span><span class="n">abspath</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;the root folder of a BIDS valid dataset (sub-XXXXX folders should &#39;</span>
+                             <span class="s1">&#39;be found at the top level in this folder).&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;output_dir&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">op</span><span class="o">.</span><span class="n">abspath</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;the output path for the outcomes of preprocessing and visual &#39;</span>
+                             <span class="s1">&#39;reports&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;analysis_level&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;run&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;participant&#39;</span><span class="p">,</span> <span class="s1">&#39;dataset&#39;</span><span class="p">],</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;processing stage to be runa (see BIDS-Apps specification).&#39;</span><span class="p">)</span>
+
+    <span class="c1"># optional arguments</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--version&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">verstr</span><span class="p">)</span>
+
+    <span class="n">g_bids</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s1">&#39;Options for filtering BIDS queries&#39;</span><span class="p">)</span>
+    <span class="n">g_bids</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--participant-label&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;one or more participant identifiers (the sub- prefix can be &#39;</span>
+                             <span class="s1">&#39;removed)&#39;</span><span class="p">)</span>
+    <span class="n">g_bids</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;--model&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;location of BIDS model description&#39;</span><span class="p">)</span>
+    <span class="n">g_bids</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="s1">&#39;--derivatives&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;location of derivatives (including preprocessed images).&#39;</span>
+                        <span class="s1">&#39;If none specified, indexes all derivatives under bids_dir/derivatives.&#39;</span><span class="p">)</span>
+    <span class="n">g_bids</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--derivative-label&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;execution label to append to derivative directory name&#39;</span><span class="p">)</span>
+    <span class="n">g_bids</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--space&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span>
+                        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;registered space of input datasets. Empty value for no explicit space.&#39;</span><span class="p">)</span>
+    <span class="n">g_bids</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--force-index&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;regex pattern or string to include files&#39;</span><span class="p">)</span>
+    <span class="n">g_bids</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--ignore&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;regex pattern or string to ignore files&#39;</span><span class="p">)</span>
+    <span class="n">g_bids</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--desc-label&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;preproc&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;use BOLD files with the provided description label&quot;</span><span class="p">)</span>
+
+    <span class="n">g_prep</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s1">&#39;Options for preprocessing BOLD series&#39;</span><span class="p">)</span>
+    <span class="n">g_prep</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-s&#39;</span><span class="p">,</span> <span class="s1">&#39;--smoothing&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;FWHM[:LEVEL:[TYPE]]&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Smooth BOLD series with FWHM mm kernel prior to fitting at LEVEL. &quot;</span>
+                             <span class="s2">&quot;Optional analysis LEVEL (default: l1) may be specified numerically &quot;</span>
+                             <span class="s2">&quot;(e.g., `l1`) or by name (`run`, `subject`, `session` or `dataset`). &quot;</span>
+                             <span class="s2">&quot;Optional smoothing TYPE (default: iso) must be one of: `iso` (isotropic). &quot;</span>
+                             <span class="s2">&quot;e.g., `--smoothing 5:dataset:iso` will perform a 5mm FWHM isotropic &quot;</span>
+                             <span class="s2">&quot;smoothing on subject-level maps, before evaluating the dataset level.&quot;</span><span class="p">)</span>
+
+    <span class="n">g_perfm</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s1">&#39;Options to handle performance&#39;</span><span class="p">)</span>
+    <span class="n">g_perfm</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--n-cpus&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;maximum number of threads across all processes&#39;</span><span class="p">)</span>
+    <span class="n">g_perfm</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--debug&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;run debug version of workflow&#39;</span><span class="p">)</span>
+    <span class="n">g_perfm</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--reports-only&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;skip running of workflow and generate reports&#39;</span><span class="p">)</span>
+
+    <span class="n">g_other</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s1">&#39;Other options&#39;</span><span class="p">)</span>
+    <span class="n">g_other</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-w&#39;</span><span class="p">,</span> <span class="s1">&#39;--work-dir&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">op</span><span class="o">.</span><span class="n">abspath</span><span class="p">,</span>
+                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;path where intermediate results should be stored&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">parser</span></div>
+
+
+<div class="viewcode-block" id="run_fitlins"><a class="viewcode-back" href="../../../api/fitlins.cli.run.html#fitlins.cli.run.run_fitlins">[docs]</a><span class="k">def</span> <span class="nf">run_fitlins</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">showwarning</span> <span class="o">=</span> <span class="n">_warn_redirect</span>
+    <span class="n">opts</span> <span class="o">=</span> <span class="n">get_parser</span><span class="p">()</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">opts</span><span class="o">.</span><span class="n">space</span><span class="p">:</span>
+        <span class="c1"># make it an explicit None</span>
+        <span class="n">opts</span><span class="o">.</span><span class="n">space</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">subject_list</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">participant_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">subject_list</span> <span class="o">=</span> <span class="n">bids</span><span class="o">.</span><span class="n">collect_participants</span><span class="p">(</span>
+            <span class="n">opts</span><span class="o">.</span><span class="n">bids_dir</span><span class="p">,</span> <span class="n">participant_label</span><span class="o">=</span><span class="n">opts</span><span class="o">.</span><span class="n">participant_label</span><span class="p">)</span>
+
+    <span class="n">ncpus</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">n_cpus</span>
+    <span class="k">if</span> <span class="n">ncpus</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ncpus</span> <span class="o">=</span> <span class="n">cpu_count</span><span class="p">()</span>
+
+    <span class="n">plugin_settings</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;plugin&#39;</span><span class="p">:</span> <span class="s1">&#39;MultiProc&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;plugin_args&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;n_procs&#39;</span><span class="p">:</span> <span class="n">ncpus</span><span class="p">,</span>
+            <span class="s1">&#39;raise_insufficient&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;maxtasksperchild&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Build main workflow</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="n">INIT_MSG</span><span class="p">(</span>
+        <span class="n">version</span><span class="o">=</span><span class="n">__version__</span><span class="p">,</span>
+        <span class="n">subject_list</span><span class="o">=</span><span class="n">subject_list</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">default_path</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">opts</span><span class="o">.</span><span class="n">bids_dir</span><span class="p">,</span> <span class="s1">&#39;model-default_smdl.json&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">model</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">op</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span>
+
+    <span class="n">derivatives</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">opts</span><span class="o">.</span><span class="n">derivatives</span> <span class="k">else</span> <span class="n">opts</span><span class="o">.</span><span class="n">derivatives</span>
+    <span class="c1"># Need this when specifying args directly (i.e. neuroscout)</span>
+    <span class="c1"># god bless neuroscout, but let&#39;s make it work for others!</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">derivatives</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">derivatives</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># WRONG AND EVIL to those who have spaces in their paths... bad bad practice</span>
+        <span class="c1"># TODO - fix neuroscout</span>
+        <span class="n">derivatives</span> <span class="o">=</span> <span class="n">derivatives</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+    <span class="n">pipeline_name</span> <span class="o">=</span> <span class="s1">&#39;fitlins&#39;</span>
+    <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">derivative_label</span><span class="p">:</span>
+        <span class="n">pipeline_name</span> <span class="o">+=</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">opts</span><span class="o">.</span><span class="n">derivative_label</span>
+    <span class="n">deriv_dir</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">pipeline_name</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">deriv_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">bids</span><span class="o">.</span><span class="n">write_derivative_description</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">bids_dir</span><span class="p">,</span> <span class="n">deriv_dir</span><span class="p">)</span>
+
+    <span class="n">work_dir</span> <span class="o">=</span> <span class="n">mkdtemp</span><span class="p">()</span> <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">work_dir</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">opts</span><span class="o">.</span><span class="n">work_dir</span>
+
+    <span class="n">fitlins_wf</span> <span class="o">=</span> <span class="n">init_fitlins_wf</span><span class="p">(</span>
+        <span class="n">opts</span><span class="o">.</span><span class="n">bids_dir</span><span class="p">,</span> <span class="n">derivatives</span><span class="p">,</span> <span class="n">deriv_dir</span><span class="p">,</span>
+        <span class="n">analysis_level</span><span class="o">=</span><span class="n">opts</span><span class="o">.</span><span class="n">analysis_level</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+        <span class="n">space</span><span class="o">=</span><span class="n">opts</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="n">opts</span><span class="o">.</span><span class="n">desc_label</span><span class="p">,</span>
+        <span class="n">participants</span><span class="o">=</span><span class="n">subject_list</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">work_dir</span><span class="p">,</span>
+        <span class="n">force_index</span><span class="o">=</span><span class="n">opts</span><span class="o">.</span><span class="n">force_index</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="n">opts</span><span class="o">.</span><span class="n">ignore</span><span class="p">,</span>
+        <span class="n">smoothing</span><span class="o">=</span><span class="n">opts</span><span class="o">.</span><span class="n">smoothing</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">work_dir</span><span class="p">:</span>
+        <span class="c1"># dump crashes in working directory (non /tmp)</span>
+        <span class="n">fitlins_wf</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;execution&#39;</span><span class="p">][</span><span class="s1">&#39;crashdump_dir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">work_dir</span>
+    <span class="c1"># easy to read crashfiles</span>
+    <span class="n">fitlins_wf</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;execution&#39;</span><span class="p">][</span><span class="s1">&#39;crashfile_format&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;txt&#39;</span>
+    <span class="n">retcode</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">opts</span><span class="o">.</span><span class="n">reports_only</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fitlins_wf</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="o">**</span><span class="n">plugin_settings</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">retcode</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">BIDSLayout</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">bids_dir</span><span class="p">,</span> <span class="n">derivatives</span><span class="o">=</span><span class="n">derivatives</span><span class="p">)</span>
+    <span class="n">models</span> <span class="o">=</span> <span class="n">auto_model</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span> <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span> <span class="k">else</span> <span class="p">[</span><span class="n">model</span><span class="p">]</span>
+
+    <span class="n">run_context</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">__version__</span><span class="p">,</span>
+                   <span class="s1">&#39;command&#39;</span><span class="p">:</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">),</span>
+                   <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S %z&#39;</span><span class="p">),</span>
+                   <span class="p">}</span>
+
+    <span class="n">selectors</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;desc&#39;</span><span class="p">:</span> <span class="n">opts</span><span class="o">.</span><span class="n">desc_label</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">selectors</span><span class="p">[</span><span class="s1">&#39;space&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">space</span>
+    <span class="k">if</span> <span class="n">subject_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">selectors</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subject_list</span>
+
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+        <span class="n">analysis</span> <span class="o">=</span> <span class="n">Analysis</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">analysis</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="o">**</span><span class="n">selectors</span><span class="p">)</span>
+        <span class="n">report_dict</span> <span class="o">=</span> <span class="n">build_report_dict</span><span class="p">(</span><span class="n">deriv_dir</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">,</span> <span class="n">analysis</span><span class="p">)</span>
+        <span class="n">write_full_report</span><span class="p">(</span><span class="n">report_dict</span><span class="p">,</span> <span class="n">run_context</span><span class="p">,</span> <span class="n">deriv_dir</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">retcode</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../api/fitlins.cli.run.html#fitlins.cli.run.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">run_fitlins</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;fitlins/cli/run.py should not be run directly;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                       <span class="s2">&quot;Please `pip install` fitlins and use the `fitlins` command&quot;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">FitLins</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model.html">BIDS Stats Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing FitLins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Center for Reproducible Neuroscience.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

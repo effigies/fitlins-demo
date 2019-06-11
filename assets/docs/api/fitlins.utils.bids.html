@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>fitlins.utils.bids module &#8212; FitLins  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/example_gallery_styles.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="fitlins.utils.collections module" href="fitlins.utils.collections.html" />
+    <link rel="prev" title="fitlins.utils package" href="fitlins.utils.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-fitlins.utils.bids">
+<span id="fitlins-utils-bids-module"></span><h1>fitlins.utils.bids module<a class="headerlink" href="#module-fitlins.utils.bids" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="utilities-to-handle-bids-inputs">
+<h2>Utilities to handle BIDS inputs<a class="headerlink" href="#utilities-to-handle-bids-inputs" title="Permalink to this headline">¶</a></h2>
+<p>Fetch some test data</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">niworkflows</span> <span class="k">import</span> <span class="n">data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_root</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_bids_examples</span><span class="p">(</span><span class="n">variant</span><span class="o">=</span><span class="s1">&#39;BIDS-examples-1-enh-ds054&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">data_root</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="exception">
+<dt id="fitlins.utils.bids.BIDSError">
+<em class="property">exception </em><code class="descclassname">fitlins.utils.bids.</code><code class="descname">BIDSError</code><span class="sig-paren">(</span><em>message</em>, <em>bids_root</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/utils/bids.html#BIDSError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.utils.bids.BIDSError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="fitlins.utils.bids.BIDSWarning">
+<em class="property">exception </em><code class="descclassname">fitlins.utils.bids.</code><code class="descname">BIDSWarning</code><a class="reference internal" href="../_modules/fitlins/utils/bids.html#BIDSWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.utils.bids.BIDSWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fitlins.utils.bids.collect_participants">
+<code class="descclassname">fitlins.utils.bids.</code><code class="descname">collect_participants</code><span class="sig-paren">(</span><em>bids_dir</em>, <em>participant_label=None</em>, <em>strict=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/utils/bids.html#collect_participants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.utils.bids.collect_participants" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the participants under the BIDS root and checks that participants
+designated with the participant_label argument exist in that folder.</p>
+<p>Returns the list of participants to be finally processed.</p>
+<p>Requesting all subjects in a BIDS directory root:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">collect_participants</span><span class="p">(</span><span class="s1">&#39;ds114&#39;</span><span class="p">)</span>
+<span class="go">[&#39;01&#39;, &#39;02&#39;, &#39;03&#39;, &#39;04&#39;, &#39;05&#39;, &#39;06&#39;, &#39;07&#39;, &#39;08&#39;, &#39;09&#39;, &#39;10&#39;]</span>
+</pre></div>
+</div>
+<p>Requesting two subjects, given their IDs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">collect_participants</span><span class="p">(</span><span class="s1">&#39;ds114&#39;</span><span class="p">,</span> <span class="n">participant_label</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;02&#39;</span><span class="p">,</span> <span class="s1">&#39;04&#39;</span><span class="p">])</span>
+<span class="go">[&#39;02&#39;, &#39;04&#39;]</span>
+</pre></div>
+</div>
+<p>Requesting two subjects, given their IDs (works with ‘sub-‘ prefixes):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">collect_participants</span><span class="p">(</span><span class="s1">&#39;ds114&#39;</span><span class="p">,</span> <span class="n">participant_label</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;sub-02&#39;</span><span class="p">,</span> <span class="s1">&#39;sub-04&#39;</span><span class="p">])</span>
+<span class="go">[&#39;02&#39;, &#39;04&#39;]</span>
+</pre></div>
+</div>
+<p>Requesting two subjects, but one does not exist:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">collect_participants</span><span class="p">(</span><span class="s1">&#39;ds114&#39;</span><span class="p">,</span> <span class="n">participant_label</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;02&#39;</span><span class="p">,</span> <span class="s1">&#39;14&#39;</span><span class="p">])</span>
+<span class="go">[&#39;02&#39;]</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt; collect_participants(&#39;ds114&#39;, participant_label=[&#39;02&#39;, &#39;14&#39;],
+...                      strict=True)  # doctest: +IGNORE_EXCEPTION_DETAIL
+Traceback (most recent call last):
+fmriprep.utils.bids.BIDSError:
+...
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="fitlins.utils.bids.write_derivative_description">
+<code class="descclassname">fitlins.utils.bids.</code><code class="descname">write_derivative_description</code><span class="sig-paren">(</span><em>bids_dir</em>, <em>deriv_dir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fitlins/utils/bids.html#write_derivative_description"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitlins.utils.bids.write_derivative_description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">FitLins</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model.html">BIDS Stats Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing FitLins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="fitlins.html">fitlins package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">API</a><ul>
+  <li><a href="fitlins.html">fitlins package</a><ul>
+  <li><a href="fitlins.utils.html">fitlins.utils package</a><ul>
+      <li>Previous: <a href="fitlins.utils.html" title="previous chapter">fitlins.utils package</a></li>
+      <li>Next: <a href="fitlins.utils.collections.html" title="next chapter">fitlins.utils.collections module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Center for Reproducible Neuroscience.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/fitlins.utils.bids.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

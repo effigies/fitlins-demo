@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>fitlins.utils.bids &#8212; FitLins  documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/example_gallery_styles.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for fitlins.utils.bids</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Utilities to handle BIDS inputs</span>
+<span class="sd">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>
+
+<span class="sd">Fetch some test data</span>
+
+<span class="sd">    &gt;&gt;&gt; import os</span>
+<span class="sd">    &gt;&gt;&gt; from niworkflows import data</span>
+<span class="sd">    &gt;&gt;&gt; data_root = data.get_bids_examples(variant=&#39;BIDS-examples-1-enh-ds054&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; os.chdir(data_root)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">bids.layout</span> <span class="k">import</span> <span class="n">BIDSLayout</span>
+
+
+<div class="viewcode-block" id="BIDSError"><a class="viewcode-back" href="../../../api/fitlins.utils.bids.html#fitlins.utils.bids.BIDSError">[docs]</a><span class="k">class</span> <span class="nc">BIDSError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">bids_root</span><span class="p">):</span>
+        <span class="n">indent</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{sep}</span><span class="s1"> BIDS root folder: &quot;</span><span class="si">{bids_root}</span><span class="s1">&quot; </span><span class="si">{sep}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">bids_root</span><span class="o">=</span><span class="n">bids_root</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;-&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">indent</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">{header}</span><span class="se">\n</span><span class="si">{indent}{message}</span><span class="se">\n</span><span class="si">{footer}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39; &#39;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">indent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
+            <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span> <span class="n">footer</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;-&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BIDSError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bids_root</span> <span class="o">=</span> <span class="n">bids_root</span></div>
+
+
+<div class="viewcode-block" id="BIDSWarning"><a class="viewcode-back" href="../../../api/fitlins.utils.bids.html#fitlins.utils.bids.BIDSWarning">[docs]</a><span class="k">class</span> <span class="nc">BIDSWarning</span><span class="p">(</span><span class="ne">RuntimeWarning</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="collect_participants"><a class="viewcode-back" href="../../../api/fitlins.utils.bids.html#fitlins.utils.bids.collect_participants">[docs]</a><span class="k">def</span> <span class="nf">collect_participants</span><span class="p">(</span><span class="n">bids_dir</span><span class="p">,</span> <span class="n">participant_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List the participants under the BIDS root and checks that participants</span>
+<span class="sd">    designated with the participant_label argument exist in that folder.</span>
+
+<span class="sd">    Returns the list of participants to be finally processed.</span>
+
+<span class="sd">    Requesting all subjects in a BIDS directory root:</span>
+
+<span class="sd">    &gt;&gt;&gt; collect_participants(&#39;ds114&#39;)</span>
+<span class="sd">    [&#39;01&#39;, &#39;02&#39;, &#39;03&#39;, &#39;04&#39;, &#39;05&#39;, &#39;06&#39;, &#39;07&#39;, &#39;08&#39;, &#39;09&#39;, &#39;10&#39;]</span>
+
+<span class="sd">    Requesting two subjects, given their IDs:</span>
+
+<span class="sd">    &gt;&gt;&gt; collect_participants(&#39;ds114&#39;, participant_label=[&#39;02&#39;, &#39;04&#39;])</span>
+<span class="sd">    [&#39;02&#39;, &#39;04&#39;]</span>
+
+<span class="sd">    Requesting two subjects, given their IDs (works with &#39;sub-&#39; prefixes):</span>
+
+<span class="sd">    &gt;&gt;&gt; collect_participants(&#39;ds114&#39;, participant_label=[&#39;sub-02&#39;, &#39;sub-04&#39;])</span>
+<span class="sd">    [&#39;02&#39;, &#39;04&#39;]</span>
+
+<span class="sd">    Requesting two subjects, but one does not exist:</span>
+
+<span class="sd">    &gt;&gt;&gt; collect_participants(&#39;ds114&#39;, participant_label=[&#39;02&#39;, &#39;14&#39;])</span>
+<span class="sd">    [&#39;02&#39;]</span>
+
+<span class="sd">    &gt;&gt;&gt; collect_participants(&#39;ds114&#39;, participant_label=[&#39;02&#39;, &#39;14&#39;],</span>
+<span class="sd">    ...                      strict=True)  # doctest: +IGNORE_EXCEPTION_DETAIL</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    fmriprep.utils.bids.BIDSError:</span>
+<span class="sd">    ...</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">BIDSLayout</span><span class="p">(</span><span class="n">bids_dir</span><span class="p">)</span>
+    <span class="n">all_participants</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">get_subjects</span><span class="p">()</span>
+
+    <span class="c1"># Error: bids_dir does not contain subjects</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">all_participants</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">BIDSError</span><span class="p">(</span>
+            <span class="s1">&#39;Could not find participants. Please make sure the BIDS data &#39;</span>
+            <span class="s1">&#39;structure is present and correct. Datasets can be validated online &#39;</span>
+            <span class="s1">&#39;using the BIDS Validator (http://incf.github.io/bids-validator/).</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;If you are using Docker for Mac or Docker for Windows, you &#39;</span>
+            <span class="s1">&#39;may need to adjust your &quot;File sharing&quot; preferences.&#39;</span><span class="p">,</span> <span class="n">bids_dir</span><span class="p">)</span>
+
+    <span class="c1"># No --participant-label was set, return all</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">participant_label</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">all_participants</span>
+
+    <span class="c1"># Drop sub- prefixes</span>
+    <span class="n">participant_label</span> <span class="o">=</span> <span class="p">[</span><span class="n">sub</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span> <span class="k">if</span> <span class="n">sub</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;sub-&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">sub</span> <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">participant_label</span><span class="p">]</span>
+
+    <span class="n">found_label</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">get_subjects</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="n">participant_label</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">found_label</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">BIDSError</span><span class="p">(</span><span class="s1">&#39;Could not find participants [</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">participant_label</span><span class="p">)),</span> <span class="n">bids_dir</span><span class="p">)</span>
+
+    <span class="c1"># Warn if some IDs were not found</span>
+    <span class="n">notfound_label</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">participant_label</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">found_label</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">notfound_label</span><span class="p">:</span>
+        <span class="n">exc</span> <span class="o">=</span> <span class="n">BIDSError</span><span class="p">(</span><span class="s1">&#39;Some participants were not found: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">notfound_label</span><span class="p">)),</span> <span class="n">bids_dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exc</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">msg</span><span class="p">,</span> <span class="n">BIDSWarning</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">found_label</span></div>
+
+
+<div class="viewcode-block" id="write_derivative_description"><a class="viewcode-back" href="../../../api/fitlins.utils.bids.html#fitlins.utils.bids.write_derivative_description">[docs]</a><span class="k">def</span> <span class="nf">write_derivative_description</span><span class="p">(</span><span class="n">bids_dir</span><span class="p">,</span> <span class="n">deriv_dir</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">fitlins</span> <span class="k">import</span> <span class="n">__version__</span>
+
+    <span class="n">desc</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;Name&#39;</span><span class="p">:</span> <span class="s1">&#39;Fitlins output&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BIDSVersion&#39;</span><span class="p">:</span> <span class="s1">&#39;1.1.0&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PipelineDescription&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;Name&#39;</span><span class="p">:</span> <span class="s1">&#39;FitLins&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;Version&#39;</span><span class="p">:</span> <span class="n">__version__</span><span class="p">,</span>
+            <span class="s1">&#39;CodeURL&#39;</span><span class="p">:</span> <span class="s1">&#39;https://github.com/poldracklab/fitlins&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="s1">&#39;CodeURL&#39;</span><span class="p">:</span> <span class="s1">&#39;https://github.com/poldracklab/fitlins&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;HowToAcknowledge&#39;</span><span class="p">:</span> <span class="s1">&#39;https://github.com/poldracklab/fitlins&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="c1"># Keys that can only be set by environment</span>
+    <span class="k">if</span> <span class="s1">&#39;FITLINS_DOCKER_TAG&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="n">desc</span><span class="p">[</span><span class="s1">&#39;DockerHubContainerTag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;FITLINS_DOCKER_TAG&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;FITLINS_SINGULARITY_URL&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="n">singularity_url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;FITLINS_SINGULARITY_URL&#39;</span><span class="p">]</span>
+        <span class="n">desc</span><span class="p">[</span><span class="s1">&#39;SingularityContainerURL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">singularity_url</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">desc</span><span class="p">[</span><span class="s1">&#39;SingularityContainerMD5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_shub_version</span><span class="p">(</span><span class="n">singularity_url</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="c1"># Keys deriving from source dataset</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bids_dir</span><span class="p">,</span> <span class="s1">&#39;dataset_description.json&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="k">as</span> <span class="n">fobj</span><span class="p">:</span>
+            <span class="n">orig_desc</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fobj</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">orig_desc</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="s1">&#39;DatasetDOI&#39;</span> <span class="ow">in</span> <span class="n">orig_desc</span><span class="p">:</span>
+        <span class="n">desc</span><span class="p">[</span><span class="s1">&#39;SourceDatasetsURLs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;https://doi.org/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                          <span class="n">orig_desc</span><span class="p">[</span><span class="s1">&#39;DatasetDOI&#39;</span><span class="p">])]</span>
+    <span class="k">if</span> <span class="s1">&#39;License&#39;</span> <span class="ow">in</span> <span class="n">orig_desc</span><span class="p">:</span>
+        <span class="n">desc</span><span class="p">[</span><span class="s1">&#39;License&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_desc</span><span class="p">[</span><span class="s1">&#39;License&#39;</span><span class="p">]</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">deriv_dir</span><span class="p">,</span> <span class="s1">&#39;dataset_description.json&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fobj</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">fobj</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_shub_version</span><span class="p">(</span><span class="n">singularity_url</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not yet implemented&quot;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">FitLins</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model.html">BIDS Stats Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing FitLins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Center for Reproducible Neuroscience.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

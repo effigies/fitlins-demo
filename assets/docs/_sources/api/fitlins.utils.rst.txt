@@ -1,0 +1,19 @@
+fitlins.utils package
+=====================
+
+Submodules
+----------
+
+.. toctree::
+
+   fitlins.utils.bids
+   fitlins.utils.collections
+   fitlins.utils.strings
+
+Module contents
+---------------
+
+.. automodule:: fitlins.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:

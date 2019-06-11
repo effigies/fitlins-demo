@@ -1,0 +1,7 @@
+fitlins.viz.corr module
+=======================
+
+.. automodule:: fitlins.viz.corr
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>fitlins.interfaces.visualizations &#8212; FitLins  documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/example_gallery_styles.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for fitlins.interfaces.visualizations</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">from</span> <span class="nn">nilearn</span> <span class="k">import</span> <span class="n">plotting</span> <span class="k">as</span> <span class="n">nlp</span>
+<span class="kn">import</span> <span class="nn">nistats</span> <span class="k">as</span> <span class="nn">nis</span>
+<span class="kn">import</span> <span class="nn">nistats.reporting</span>  <span class="c1"># noqa: F401</span>
+
+<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">SimpleInterface</span><span class="p">,</span> <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span> <span class="n">TraitedSpec</span><span class="p">,</span>
+    <span class="n">File</span><span class="p">,</span> <span class="n">traits</span><span class="p">,</span> <span class="n">isdefined</span>
+    <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="k">import</span> <span class="n">fname_presuffix</span><span class="p">,</span> <span class="n">split_filename</span>
+
+<span class="kn">from</span> <span class="nn">..viz</span> <span class="k">import</span> <span class="n">plot_and_save</span><span class="p">,</span> <span class="n">plot_corr_matrix</span><span class="p">,</span> <span class="n">plot_contrast_matrix</span>
+
+
+<div class="viewcode-block" id="VisualizationInputSpec"><a class="viewcode-back" href="../../../api/fitlins.interfaces.visualizations.html#fitlins.interfaces.visualizations.VisualizationInputSpec">[docs]</a><span class="k">class</span> <span class="nc">VisualizationInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Data file to visualize&#39;</span><span class="p">)</span>
+    <span class="n">image_type</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s1">&#39;svg&#39;</span><span class="p">,</span> <span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VisualizationOutputSpec"><a class="viewcode-back" href="../../../api/fitlins.interfaces.visualizations.html#fitlins.interfaces.visualizations.VisualizationOutputSpec">[docs]</a><span class="k">class</span> <span class="nc">VisualizationOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">figure</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Visualization&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Visualization"><a class="viewcode-back" href="../../../api/fitlins.interfaces.visualizations.html#fitlins.interfaces.visualizations.Visualization">[docs]</a><span class="k">class</span> <span class="nc">Visualization</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">VisualizationInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">VisualizationOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">matplotlib</span>
+        <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Agg&#39;</span><span class="p">)</span>
+        <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+        <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s1">&#39;white&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;svg.fonttype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;image.interpolation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;nearest&#39;</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">out_name</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                                   <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">image_type</span><span class="p">,</span>
+                                   <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span>
+                                   <span class="n">use_ext</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_visualize</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">out_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;figure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_name</span>
+        <span class="k">return</span> <span class="n">runtime</span>
+
+    <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.tsv&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;.nii&#39;</span><span class="p">,</span> <span class="s1">&#39;.nii.gz&#39;</span><span class="p">,</span> <span class="s1">&#39;.gii&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown file type!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DesignPlot"><a class="viewcode-back" href="../../../api/fitlins.interfaces.visualizations.html#fitlins.interfaces.visualizations.DesignPlot">[docs]</a><span class="k">class</span> <span class="nc">DesignPlot</span><span class="p">(</span><span class="n">Visualization</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_visualize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">out_name</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="s1">&#39;viridis&#39;</span><span class="p">)</span>
+        <span class="n">plot_and_save</span><span class="p">(</span><span class="n">out_name</span><span class="p">,</span> <span class="n">nis</span><span class="o">.</span><span class="n">reporting</span><span class="o">.</span><span class="n">plot_design_matrix</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DesignCorrelationPlotInputSpec"><a class="viewcode-back" href="../../../api/fitlins.interfaces.visualizations.html#fitlins.interfaces.visualizations.DesignCorrelationPlotInputSpec">[docs]</a><span class="k">class</span> <span class="nc">DesignCorrelationPlotInputSpec</span><span class="p">(</span><span class="n">VisualizationInputSpec</span><span class="p">):</span>
+    <span class="n">contrast_info</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Dict</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DesignCorrelationPlot"><a class="viewcode-back" href="../../../api/fitlins.interfaces.visualizations.html#fitlins.interfaces.visualizations.DesignCorrelationPlot">[docs]</a><span class="k">class</span> <span class="nc">DesignCorrelationPlot</span><span class="p">(</span><span class="n">Visualization</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">DesignCorrelationPlotInputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_visualize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">out_name</span><span class="p">):</span>
+        <span class="n">contrast_matrix</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]:</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;weights&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                                        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">contrast_info</span><span class="p">})</span>
+        <span class="n">all_cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">evs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">contrast_matrix</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">contrast_matrix</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">!=</span> <span class="n">all_cols</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">evs</span><span class="p">)]:</span>
+            <span class="n">ev_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">all_cols</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">evs</span><span class="p">]</span>
+            <span class="n">confound_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">all_cols</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">evs</span><span class="p">]</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">ev_cols</span> <span class="o">+</span> <span class="n">confound_cols</span><span class="p">]</span>
+        <span class="n">plot_and_save</span><span class="p">(</span><span class="n">out_name</span><span class="p">,</span> <span class="n">plot_corr_matrix</span><span class="p">,</span>
+                      <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">corr</span><span class="p">(),</span>
+                      <span class="nb">len</span><span class="p">(</span><span class="n">evs</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ContrastMatrixPlotInputSpec"><a class="viewcode-back" href="../../../api/fitlins.interfaces.visualizations.html#fitlins.interfaces.visualizations.ContrastMatrixPlotInputSpec">[docs]</a><span class="k">class</span> <span class="nc">ContrastMatrixPlotInputSpec</span><span class="p">(</span><span class="n">VisualizationInputSpec</span><span class="p">):</span>
+    <span class="n">contrast_info</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Dict</span><span class="p">)</span>
+    <span class="n">orientation</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="s1">&#39;vertical&#39;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                              <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Display orientation of contrast matrix&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ContrastMatrixPlot"><a class="viewcode-back" href="../../../api/fitlins.interfaces.visualizations.html#fitlins.interfaces.visualizations.ContrastMatrixPlot">[docs]</a><span class="k">class</span> <span class="nc">ContrastMatrixPlot</span><span class="p">(</span><span class="n">Visualization</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">ContrastMatrixPlotInputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_visualize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">out_name</span><span class="p">):</span>
+        <span class="n">contrast_matrix</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]:</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;weights&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                                        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">contrast_info</span><span class="p">},</span>
+                                       <span class="n">index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">contrast_matrix</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;constant&#39;</span> <span class="ow">in</span> <span class="n">contrast_matrix</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="n">contrast_matrix</span> <span class="o">=</span> <span class="n">contrast_matrix</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">)</span>
+        <span class="n">plot_and_save</span><span class="p">(</span><span class="n">out_name</span><span class="p">,</span> <span class="n">plot_contrast_matrix</span><span class="p">,</span> <span class="n">contrast_matrix</span><span class="p">,</span>
+                      <span class="n">ornt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">orientation</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GlassBrainPlotInputSpec"><a class="viewcode-back" href="../../../api/fitlins.interfaces.visualizations.html#fitlins.interfaces.visualizations.GlassBrainPlotInputSpec">[docs]</a><span class="k">class</span> <span class="nc">GlassBrainPlotInputSpec</span><span class="p">(</span><span class="n">VisualizationInputSpec</span><span class="p">):</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(),</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">vmax</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">()</span>
+    <span class="n">colormap</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="s1">&#39;bwr&#39;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GlassBrainPlot"><a class="viewcode-back" href="../../../api/fitlins.interfaces.visualizations.html#fitlins.interfaces.visualizations.GlassBrainPlot">[docs]</a><span class="k">class</span> <span class="nc">GlassBrainPlot</span><span class="p">(</span><span class="n">Visualization</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">GlassBrainPlotInputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_visualize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">out_name</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+        <span class="n">vmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">vmax</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isdefined</span><span class="p">(</span><span class="n">vmax</span><span class="p">):</span>
+            <span class="n">vmax</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">abs_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">())</span>
+            <span class="n">pctile99</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">abs_data</span><span class="p">,</span> <span class="mf">99.99</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">abs_data</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">pctile99</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="n">vmax</span> <span class="o">=</span> <span class="n">pctile99</span>
+        <span class="n">nlp</span><span class="o">.</span><span class="n">plot_glass_brain</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plot_abs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">display_mode</span><span class="o">=</span><span class="s1">&#39;lyrz&#39;</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                             <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">threshold</span><span class="p">,</span>
+                             <span class="n">cmap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">colormap</span><span class="p">,</span>
+                             <span class="n">output_file</span><span class="o">=</span><span class="n">out_name</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">FitLins</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model.html">BIDS Stats Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing FitLins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Center for Reproducible Neuroscience.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

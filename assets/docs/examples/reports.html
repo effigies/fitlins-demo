@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Reports &#8212; FitLins  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/example_gallery_styles.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Notebooks" href="notebooks/index.html" />
+    <link rel="prev" title="FitLins Example Models" href="models.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="reports">
+<h1>Reports<a class="headerlink" href="#reports" title="Permalink to this headline">¶</a></h1>
+<p>FitLins generates summary reports, written to <code class="docutils literal notranslate"><span class="pre">&lt;output</span> <span class="pre">dir&gt;/fitlins/reports/</span></code>.
+This directory contains a report for each unit of analysis, with visualizations
+of design matrices and statistical outputs.</p>
+<p>View <a class="reference external" href="../_static/reports/model-ds003Model001.html">example report</a>.</p>
+<div class="section" id="visualizations">
+<h2>Visualizations<a class="headerlink" href="#visualizations" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="design-matrices">
+<h3>Design matrices<a class="headerlink" href="#design-matrices" title="Permalink to this headline">¶</a></h3>
+<p>Examining the design matrix is a quick visual indicator of whether your model was
+correctly constructed.
+Task regressors should be predictable, given the study design, and, in the case of
+this example, we see a clear block design pattern.</p>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="../_images/sub-01_task-rhymejudgment_design.svg"><img alt="Design matrix" src="../_images/sub-01_task-rhymejudgment_design.svg" /></a>
+<p class="caption"><span class="caption-text">The design matrix constructed from the BIDS model.
+The columns correspond to regressors, or explanatory variables, and the rows
+correspond to BOLD volumes.
+Cosine drift and constant regressors are added to account for low-frequency
+components.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="regressor-correlation-matrices">
+<h3>Regressor correlation matrices<a class="headerlink" href="#regressor-correlation-matrices" title="Permalink to this headline">¶</a></h3>
+<p>Regressor correlation matrices are provided in order to diagnose collinearities in
+the design matrix.
+High correlations among variables of interest or between variables of interest
+and nuisance regressors are cause for concern, as the GLM will not be able to
+distinguish signal attributable to one regressor from that attributable to a
+collinear regressor.</p>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="../_images/sub-01_task-rhymejudgment_corr.svg"><img alt="Regressor correlation matrix" src="../_images/sub-01_task-rhymejudgment_corr.svg" /></a>
+<p class="caption"><span class="caption-text">Correlations between regressors are plotted.
+Bold black lines separate variables that are included in contrasts, or <em>variables
+of interest</em>, and variables that are not, or <em>nuissance regressors</em>.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="contrast-matrices">
+<h3>Contrast matrices<a class="headerlink" href="#contrast-matrices" title="Permalink to this headline">¶</a></h3>
+<div class="figure align-center" id="id3">
+<a class="reference internal image-reference" href="../_images/sub-01_task-rhymejudgment_contrasts.svg"><img alt="Contrast matrix" src="../_images/sub-01_task-rhymejudgment_contrasts.svg" /></a>
+<p class="caption"><span class="caption-text">Contrast matrices show the variable weightings for each contrast.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="glass-brain-plots">
+<h3>Glass brain plots<a class="headerlink" href="#glass-brain-plots" title="Permalink to this headline">¶</a></h3>
+<div class="figure align-center" id="id4">
+<a class="reference internal image-reference" href="../_images/sub-01_task-rhymejudgment_space-MNI152NLin2009cAsym_contrast-wordGtPseudo_stat-t_ortho.png"><img alt="Glass brain plot, or maximum intensity projection" src="../_images/sub-01_task-rhymejudgment_space-MNI152NLin2009cAsym_contrast-wordGtPseudo_stat-t_ortho.png" style="width: 475.0px; height: 130.0px;" /></a>
+<p class="caption"><span class="caption-text">Glass brains, or maximum-intensity projections, show the highest absolute value
+along the viewing axis at each point in the viewing plane.
+Large patterns will be evident in this view.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="naming-decisions">
+<h2>Naming decisions<a class="headerlink" href="#naming-decisions" title="Permalink to this headline">¶</a></h2>
+<p>For reporting purposes, FitLins performs some minor reformatting of contrast
+names.
+If <code class="docutils literal notranslate"><span class="pre">_gt_</span></code> is found, for example, FitLins will display it in the report
+document (although not the figures) as <code class="docutils literal notranslate"><span class="pre">&gt;</span></code>.
+Similarly, <code class="docutils literal notranslate"><span class="pre">_lt_</span></code> and <code class="docutils literal notranslate"><span class="pre">_vs_</span></code> become <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> and “vs.”, respectively.
+See the <a class="reference external" href="../_static/reports/model-ds003Model001.html">example report</a> for examples.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">FitLins</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model.html">BIDS Stats Models</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/index.html">Notebooks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing FitLins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Examples</a><ul>
+      <li>Previous: <a href="models.html" title="previous chapter">FitLins Example Models</a></li>
+      <li>Next: <a href="notebooks/index.html" title="next chapter">Notebooks</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Center for Reproducible Neuroscience.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/examples/reports.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

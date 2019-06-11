@@ -1,0 +1,7 @@
+fitlins.cli.run module
+======================
+
+.. automodule:: fitlins.cli.run
+    :members:
+    :undoc-members:
+    :show-inheritance:

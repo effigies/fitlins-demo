@@ -1,0 +1,7 @@
+fitlins.interfaces.visualizations module
+========================================
+
+.. automodule:: fitlins.interfaces.visualizations
+    :members:
+    :undoc-members:
+    :show-inheritance:

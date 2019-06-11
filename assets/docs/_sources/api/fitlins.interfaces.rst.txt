@@ -1,0 +1,21 @@
+fitlins.interfaces package
+==========================
+
+Submodules
+----------
+
+.. toctree::
+
+   fitlins.interfaces.bids
+   fitlins.interfaces.fsl2
+   fitlins.interfaces.nistats
+   fitlins.interfaces.utils
+   fitlins.interfaces.visualizations
+
+Module contents
+---------------
+
+.. automodule:: fitlins.interfaces
+    :members:
+    :undoc-members:
+    :show-inheritance:

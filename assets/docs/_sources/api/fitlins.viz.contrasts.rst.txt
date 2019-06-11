@@ -1,0 +1,7 @@
+fitlins.viz.contrasts module
+============================
+
+.. automodule:: fitlins.viz.contrasts
+    :members:
+    :undoc-members:
+    :show-inheritance:

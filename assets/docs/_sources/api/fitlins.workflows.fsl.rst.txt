@@ -1,0 +1,7 @@
+fitlins.workflows.fsl module
+============================
+
+.. automodule:: fitlins.workflows.fsl
+    :members:
+    :undoc-members:
+    :show-inheritance:

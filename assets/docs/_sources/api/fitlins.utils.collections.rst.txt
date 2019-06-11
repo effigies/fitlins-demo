@@ -1,0 +1,7 @@
+fitlins.utils.collections module
+================================
+
+.. automodule:: fitlins.utils.collections
+    :members:
+    :undoc-members:
+    :show-inheritance:

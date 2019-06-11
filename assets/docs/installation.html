@@ -1,0 +1,313 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Installation &#8212; FitLins  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/example_gallery_styles.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Usage" href="usage.html" />
+    <link rel="prev" title="FitLins - Fitting Linear Models to BIDS Datasets" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="installation">
+<span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>There are three ways to use FitLins: in a <a class="reference internal" href="#docker-container">Docker Container</a>, a <a class="reference internal" href="#singularity-container">Singularity Container</a>, or in a
+<a class="reference internal" href="#manually-prepared-environment-python-3-6">Manually Prepared Environment (Python 3.6+)</a>.</p>
+<p>For the sake of consistency, using containers is highly recommended.
+While some command-line options are discussed in this page, it is not intended to be exhausitve.
+For a full set of options, see <a class="reference internal" href="usage.html#usage"><span class="std std-ref">Usage</span></a>.</p>
+<div class="section" id="data-organization">
+<h2>Data Organization<a class="headerlink" href="#data-organization" title="Permalink to this headline">¶</a></h2>
+<p>To make the examples in this document concrete, let’s suppose that we have the following
+structure:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">data</span><span class="o">/</span>
+  <span class="n">raw</span><span class="o">/</span>
+    <span class="n">dsX</span><span class="o">/</span>
+    <span class="n">dsY</span><span class="o">/</span>
+    <span class="o">...</span>
+  <span class="n">prep</span><span class="o">/</span>
+    <span class="n">dsX</span><span class="o">/</span>
+      <span class="n">fmriprep</span><span class="o">/</span>
+    <span class="n">dsY</span><span class="o">/</span>
+    <span class="o">...</span>
+  <span class="n">analyzed</span><span class="o">/</span>
+    <span class="n">dsX</span><span class="o">/</span>
+    <span class="n">dsY</span><span class="o">/</span>
+<span class="o">/</span><span class="n">scratch</span>
+</pre></div>
+</div>
+<p>Here, we have an original BIDS dataset <code class="docutils literal notranslate"><span class="pre">/data/raw/dsX</span></code>, a <a class="reference external" href="https://bids-specification.readthedocs.io/en/derivatives/05-derivatives/01-introduction.html">BIDS Derivatives</a> dataset (such as
+would be produced by <a class="reference external" href="https://fmriprep.readthedocs.io">fMRIPrep</a>) at <code class="docutils literal notranslate"><span class="pre">/data/prep/dsX/fmriprep</span></code>, and a target directory for storing
+FitLins analyses at <code class="docutils literal notranslate"><span class="pre">/data/analyzed/dsX</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There are many ways to organize related datasets while conforming to the BIDS standard.
+This is a simple one that keeps each stage of processing in a separate directory;
+you may prefer to keep all stages for a single dataset in a given directory, or even to nest
+related data structures.
+Each of these approaches is valid, and only minor changes should be needed to the examples below
+to accommodate your preferences.</p>
+</div>
+<p>Additionally, we have a <code class="docutils literal notranslate"><span class="pre">/scratch</span></code> directory for storing the intermediate results of a <a class="reference external" href="https://nipype.readthedocs.io">Nipype</a>
+workflow.
+This can be useful for debugging or resuming interrupted runs.</p>
+</div>
+<div class="section" id="docker-container">
+<h2>Docker Container<a class="headerlink" href="#docker-container" title="Permalink to this headline">¶</a></h2>
+<p>In order to run FitLins in a Docker container, Docker must be <a class="reference external" href="https://docs.docker.com/engine/installation/">installed</a>.</p>
+<div class="section" id="getting-the-docker-image">
+<h3>Getting the Docker image<a class="headerlink" href="#getting-the-docker-image" title="Permalink to this headline">¶</a></h3>
+<p>To download a specific version of FitLins, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">pull</span> <span class="n">poldracklab</span><span class="o">/</span><span class="n">fitlins</span><span class="p">:</span><span class="o">&lt;</span><span class="n">VERSION</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">:&lt;VERSION&gt;</span></code> is a <em>tag</em>, in Docker terminology, and all tags may be found on <a class="reference external" href="https://hub.docker.com/r/poldracklab/fitlins/tags/">FitLins’ DockerHub
+page</a>.
+<code class="docutils literal notranslate"><span class="pre">:latest</span></code> refers to the most recent release, and <code class="docutils literal notranslate"><span class="pre">:master</span></code> refers to the most recent changes
+in the GitHub repository, but <em>only as of the last time you ran</em> <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">pull</span></code>.
+We highly recommend using a tag for a specific version, to reduce opportunities for confusion.</p>
+</div>
+<div class="section" id="running-the-docker-image">
+<h3>Running the Docker image<a class="headerlink" href="#running-the-docker-image" title="Permalink to this headline">¶</a></h3>
+<p>Docker commands take the form:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">&lt;</span><span class="n">DOCKER_OPTIONS</span><span class="o">&gt;</span> \
+  <span class="n">poldracklab</span><span class="o">/</span><span class="n">fitlins</span><span class="p">:</span><span class="o">&lt;</span><span class="n">VERSION</span><span class="o">&gt;</span> \
+  <span class="o">&lt;</span><span class="n">FITLINS_OPTIONS</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The most important thing for running FitLins in Docker is to mount directories inside the Docker
+container, so that the FitLins program running inside the container is able to read files from
+and write files to those directories.
+As noted above, there are at least three relevant directories:
+at least one data directory, containing original and preprocessed datasets;
+an output directory, to store FitLins results;
+and a working directory, to store the intermediate results of <a class="reference external" href="https://nipype.readthedocs.io">Nipype</a> workflows.</p>
+<p>These must be mounted using the <code class="docutils literal notranslate"><span class="pre">-v</span></code> Docker option.
+For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">raw</span><span class="o">/</span><span class="n">dsX</span><span class="p">:</span><span class="o">/</span><span class="n">bids</span><span class="p">:</span><span class="n">ro</span>
+<span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">prep</span><span class="o">/</span><span class="n">dsX</span><span class="o">/</span><span class="n">fmriprep</span><span class="p">:</span><span class="o">/</span><span class="n">prep</span><span class="p">:</span><span class="n">ro</span>
+<span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">analyzed</span><span class="o">/</span><span class="n">dsX</span><span class="p">:</span><span class="o">/</span><span class="n">out</span>
+<span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">scratch</span><span class="p">:</span><span class="o">/</span><span class="n">scratch</span>
+</pre></div>
+</div>
+<p>Note that on the left of each colon (<code class="docutils literal notranslate"><span class="pre">:</span></code>) is the true path to your data.
+On the right is where those files will be available inside the container;
+this is an arbitrary choice, but we’re using short paths for brevity.
+The <code class="docutils literal notranslate"><span class="pre">:ro</span></code> directive for the input datasets indicates they should be made <em>read-only</em> to the
+container, which is a good precaution against bugs in FitLins from damaging your inputs.</p>
+<p>So a basic command would look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">rm</span> <span class="o">-</span><span class="n">it</span> \
+    <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">raw</span><span class="o">/</span><span class="n">dsX</span><span class="p">:</span><span class="o">/</span><span class="n">bids</span><span class="p">:</span><span class="n">ro</span> \
+    <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">prep</span><span class="o">/</span><span class="n">dsX</span><span class="o">/</span><span class="n">fmriprep</span><span class="p">:</span><span class="o">/</span><span class="n">prep</span><span class="p">:</span><span class="n">ro</span> \
+    <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">analyzed</span><span class="o">/</span><span class="n">dsX</span><span class="p">:</span><span class="o">/</span><span class="n">out</span> \
+    <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">scratch</span><span class="p">:</span><span class="o">/</span><span class="n">scratch</span> \
+  <span class="n">poldracklab</span><span class="o">/</span><span class="n">fitlins</span><span class="p">:</span><span class="mf">0.4</span><span class="o">.</span><span class="mi">0</span> \
+    <span class="o">/</span><span class="n">bids</span> <span class="o">/</span><span class="n">out</span> <span class="n">dataset</span> <span class="o">-</span><span class="n">d</span> <span class="o">/</span><span class="n">prep</span> <span class="o">-</span><span class="n">w</span> <span class="o">/</span><span class="n">scratch</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="singularity-container">
+<h2>Singularity Container<a class="headerlink" href="#singularity-container" title="Permalink to this headline">¶</a></h2>
+<p>For security reasons, many <abbr title="High Performance Computing">HPC</abbr>/<abbr title="High Throughput Computing">HTC</abbr> environments do not allow Docker containers, but increasingly many are now allowing
+<a class="reference external" href="https://github.com/singularityware/singularity">Singularity</a> containers.</p>
+<div class="section" id="getting-a-singularity-image">
+<h3>Getting a Singularity image<a class="headerlink" href="#getting-a-singularity-image" title="Permalink to this headline">¶</a></h3>
+<p>We hope in the near future to host official Singularity images on <a class="reference external" href="https://singularity-hub.org/">Singularity Hub</a>, but it is
+currently necessary for users to generate their own images from the Docker images we provide.</p>
+<p>For Singularity version 2.5 or higher, <code class="docutils literal notranslate"><span class="pre">singularity</span> <span class="pre">build</span></code> is sufficient:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">singularity</span> <span class="n">build</span> <span class="o">/</span><span class="n">my_images</span><span class="o">/</span><span class="n">fitlins</span><span class="o">-&lt;</span><span class="n">VERSION</span><span class="o">&gt;.</span><span class="n">simg</span> \
+  <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="n">poldracklab</span><span class="o">/</span><span class="n">fitlins</span><span class="p">:</span><span class="o">&lt;</span><span class="n">VERSION</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Please see <a class="reference internal" href="#getting-the-docker-image">Getting the Docker image</a> for a discussion on versions and tags.</p>
+<p>To target older versions of Singularity, you can use <a class="reference external" href="https://github.com/singularityware/docker2singularity">docker2singularity</a>, which is itself must be run in
+Docker:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">privileged</span> <span class="o">-</span><span class="n">t</span> <span class="o">--</span><span class="n">rm</span> \
+  <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span> \
+  <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">my_images</span><span class="p">:</span><span class="o">/</span><span class="n">output</span> \
+  <span class="n">singularityware</span><span class="o">/</span><span class="n">docker2singularity</span> \
+  <span class="n">poldracklab</span><span class="o">/</span><span class="n">fitlins</span><span class="p">:</span><span class="o">&lt;</span><span class="n">VERSION</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>For Windows users:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">privileged</span> <span class="o">-</span><span class="n">t</span> <span class="o">--</span><span class="n">rm</span> \
+  <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span> \
+  <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span>\<span class="n">host</span>\<span class="n">path</span>\<span class="n">where</span>\<span class="n">to</span>\<span class="n">output</span>\<span class="n">singularity</span>\<span class="n">image</span><span class="p">:</span><span class="o">/</span><span class="n">output</span> \
+  <span class="n">singularityware</span><span class="o">/</span><span class="n">docker2singularity</span> \
+  <span class="n">poldracklab</span><span class="o">/</span><span class="n">fitlins</span><span class="p">:</span><span class="o">&lt;</span><span class="n">VERSION</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>This image may now be transfered to your cluster.</p>
+</div>
+<div class="section" id="running-a-singularity-image">
+<h3>Running a Singularity image<a class="headerlink" href="#running-a-singularity-image" title="Permalink to this headline">¶</a></h3>
+<p>Singularity installations often permit using filesystem paths without translation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">singularity</span> <span class="n">run</span> <span class="o">--</span><span class="n">cleanenv</span> <span class="o">/</span><span class="n">my_images</span><span class="o">/</span><span class="n">fitlins</span><span class="o">-</span><span class="mf">0.4</span><span class="o">.</span><span class="mf">0.</span><span class="n">simg</span> \
+  <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">raw</span><span class="o">/</span><span class="n">dsX</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">analyzed</span><span class="o">/</span><span class="n">dsX</span> <span class="n">dataset</span> \
+  <span class="o">-</span><span class="n">d</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">prep</span><span class="o">/</span><span class="n">dsX</span><span class="o">/</span><span class="n">fmriprep</span> \
+  <span class="o">-</span><span class="n">w</span> <span class="o">/</span><span class="n">scratch</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Singularity by default <a class="reference external" href="https://github.com/singularityware/singularity/issues/445">exposes all environment variables from the host inside
+the container</a>.
+Because of this your host libraries (such as nipype) could be accidentally used
+instead of the ones inside the container - if they are included in <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code>.
+To avoid such situation we recommend using the <code class="docutils literal notranslate"><span class="pre">--cleanenv</span></code> singularity flag
+in production use, as in the above example.</p>
+</div>
+<p>In some cases, your directories may not be available inside the container, in which
+case the <code class="docutils literal notranslate"><span class="pre">-B</span></code> flag works very similarly to the <code class="docutils literal notranslate"><span class="pre">-v</span></code> flag in Docker:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">singularity</span> <span class="n">run</span> <span class="o">--</span><span class="n">cleanenv</span> \
+    <span class="o">-</span><span class="n">B</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">raw</span><span class="o">/</span><span class="n">dsX</span><span class="p">:</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">raw</span><span class="o">/</span><span class="n">dsX</span> \
+    <span class="o">-</span><span class="n">B</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">prep</span><span class="o">/</span><span class="n">dsX</span><span class="o">/</span><span class="n">fmriprep</span><span class="p">:</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">prep</span><span class="o">/</span><span class="n">dsX</span><span class="o">/</span><span class="n">fmriprep</span> \
+    <span class="o">-</span><span class="n">B</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">analyzed</span><span class="o">/</span><span class="n">dsX</span><span class="p">:</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">analyzed</span><span class="o">/</span><span class="n">dsX</span> \
+    <span class="o">-</span><span class="n">B</span> <span class="o">/</span><span class="n">scratch</span><span class="p">:</span><span class="o">/</span><span class="n">scratch</span> \
+  <span class="o">/</span><span class="n">my_images</span><span class="o">/</span><span class="n">fitlins</span><span class="o">-</span><span class="mf">0.4</span><span class="o">.</span><span class="mf">0.</span><span class="n">simg</span> \
+    <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">raw</span><span class="o">/</span><span class="n">dsX</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">analyzed</span><span class="o">/</span><span class="n">dsX</span> <span class="n">dataset</span> \
+    <span class="o">-</span><span class="n">d</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">prep</span><span class="o">/</span><span class="n">dsX</span><span class="o">/</span><span class="n">fmriprep</span> \
+    <span class="o">-</span><span class="n">w</span> <span class="o">/</span><span class="n">scratch</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="manually-prepared-environment-python-3-6">
+<h2>Manually Prepared Environment (Python 3.6+)<a class="headerlink" href="#manually-prepared-environment-python-3-6" title="Permalink to this headline">¶</a></h2>
+<p>Because FitLins sometimes depends on unreleased versions of upstream libraries
+(in particular, <a class="reference external" href="https://nistats.github.io/">Nistats</a>, <a class="reference external" href="https://github.com/bids-standard/pybids/">PyBIDS</a> and <a class="reference external" href="https://nipype.readthedocs.io">Nipype</a>), it is inadvisable to install
+directly into your base Python environment.</p>
+<p>If you have <a class="reference external" href="https://anaconda.org/">Anaconda</a>/<a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a> installed, you can create a new environment with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">fitlins</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.6</span>
+<span class="n">conda</span> <span class="n">activate</span> <span class="n">fitlins</span>
+</pre></div>
+</div>
+<p>In most Python installations, you can create an environment with
+<a class="reference external" href="https://virtualenv.pypa.io/">virtualenv</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">virtualenv</span>
+<span class="n">virtualenv</span> <span class="o">--</span><span class="n">python</span><span class="o">=</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span> <span class="n">fitlins</span><span class="o">.</span><span class="n">venv</span>
+<span class="n">source</span> <span class="n">fitlins</span><span class="o">.</span><span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+</pre></div>
+</div>
+<p>Once inside the environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">fitlins</span>
+</pre></div>
+</div>
+<p>You can now run FitLins:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fitlins</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">raw</span><span class="o">/</span><span class="n">dsX</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">analyzed</span><span class="o">/</span><span class="n">dsX</span> <span class="n">dataset</span> \
+  <span class="o">-</span><span class="n">d</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">prep</span><span class="o">/</span><span class="n">dsX</span><span class="o">/</span><span class="n">fmriprep</span> \
+  <span class="o">-</span><span class="n">w</span> <span class="o">/</span><span class="n">scratch</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">FitLins</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#data-organization">Data Organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#docker-container">Docker Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#singularity-container">Singularity Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manually-prepared-environment-python-3-6">Manually Prepared Environment (Python 3.6+)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">BIDS Stats Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing FitLins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">FitLins - Fitting Linear Models to BIDS Datasets</a></li>
+      <li>Next: <a href="usage.html" title="next chapter">Usage</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Center for Reproducible Neuroscience.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/installation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

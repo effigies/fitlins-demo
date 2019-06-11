@@ -1,0 +1,7 @@
+fitlins.viz.reports module
+==========================
+
+.. automodule:: fitlins.viz.reports
+    :members:
+    :undoc-members:
+    :show-inheritance:

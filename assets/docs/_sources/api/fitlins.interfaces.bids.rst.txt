@@ -1,0 +1,7 @@
+fitlins.interfaces.bids module
+==============================
+
+.. automodule:: fitlins.interfaces.bids
+    :members:
+    :undoc-members:
+    :show-inheritance:

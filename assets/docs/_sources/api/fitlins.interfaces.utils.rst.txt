@@ -1,0 +1,7 @@
+fitlins.interfaces.utils module
+===============================
+
+.. automodule:: fitlins.interfaces.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:

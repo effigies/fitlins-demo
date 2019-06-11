@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>FitLins - Fitting Linear Models to BIDS Datasets &#8212; FitLins  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/example_gallery_styles.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="fitlins-fitting-linear-models-to-bids-datasets">
+<h1>FitLins - Fitting Linear Models to BIDS Datasets<a class="headerlink" href="#fitlins-fitting-linear-models-to-bids-datasets" title="Permalink to this headline">¶</a></h1>
+<a class="reference external image-reference" href="https://doi.org/10.5281/zenodo.1306215"><img alt="https://zenodo.org/badge/DOI/10.5281/zenodo.1306215.svg" src="https://zenodo.org/badge/DOI/10.5281/zenodo.1306215.svg" /></a>
+<a class="reference external image-reference" href="https://codecov.io/gh/poldracklab/fitlins"><img alt="https://codecov.io/gh/poldracklab/fitlins/branch/master/graph/badge.svg" src="https://codecov.io/gh/poldracklab/fitlins/branch/master/graph/badge.svg" /></a>
+<a class="reference external image-reference" href="https://circleci.com/gh/poldracklab/fitlins"><img alt="https://circleci.com/gh/poldracklab/fitlins.svg?style=svg" src="https://circleci.com/gh/poldracklab/fitlins.svg?style=svg" /></a>
+<p>FitLins is a tool for estimating linear models, defined by the
+<a class="reference external" href="https://docs.google.com/document/d/1bq5eNDHTb6Nkx3WUiOBgKvLNnaa5OMcGtD0AZ9yms2M/">BIDS Stats Models</a> specification proposal, to <a class="reference external" href="https://bids.neuroimaging.io/">BIDS</a>-formatted datasets.</p>
+<p>FitLins is developed against <a class="reference external" href="https://fmriprep.readthedocs.io">fMRIPrep</a>-preprocessed datasets, but is intended to
+work with any dataset following the <a class="reference external" href="https://bids-specification.readthedocs.io/en/derivatives/05-derivatives/01-introduction.html">BIDS Derivatives</a> draft specification.</p>
+<p>Example models can be found in <a class="reference external" href="https://github.com/poldracklab/fitlins/tree/master/examples/models/">examples/models</a> in the main repository and
+<a class="reference external" href="https://fitlins.readthedocs.io/en/latest/examples/models.html">FitLins Example Models</a> in the documentation.</p>
+<p>This pipeline is developed by the <a class="reference external" href="https://poldracklab.stanford.edu/">Poldrack lab at Stanford University</a> for use at the <a class="reference external" href="http://reproducibility.stanford.edu/">Center for Reproducible
+Neuroscience (CRN)</a>, as well as for
+open-source software distribution.</p>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#data-organization">Data Organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#docker-container">Docker Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#singularity-container">Singularity Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#manually-prepared-environment-python-3-6">Manually Prepared Environment (Python 3.6+)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#execution-and-the-bids-format">Execution and the BIDS format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#command-line-arguments">Command-Line Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">BIDS Stats Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/models.html">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/reports.html">Reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/notebooks/index.html">Notebooks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">What’s new</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#may-10-2019">0.4.0 (May 10, 2019)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#april-19-2019">0.3.0 (April 19, 2019)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#february-1-2019">0.2.0 (February 1, 2019)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#august-24-2018">0.1.0 (August 24, 2018)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#august-06-2018">0.0.6 (August 06, 2018)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#august-01-2018">0.0.5 (August 01, 2018)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#july-05-2018">0.0.4 (July 05, 2018)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#march-9-2018">0.0.3 (March 9, 2018)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#march-5-2018">0.0.2 (March 5, 2018)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#id1">0.0.1 (March 5, 2018)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing FitLins</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="citing.html#license-information">License information</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/fitlins.html">fitlins package</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">FitLins</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">BIDS Stats Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing FitLins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="installation.html" title="next chapter">Installation</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Center for Reproducible Neuroscience.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

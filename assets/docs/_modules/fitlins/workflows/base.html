@@ -1,0 +1,436 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>fitlins.workflows.base &#8212; FitLins  documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/example_gallery_styles.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for fitlins.workflows.base</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">nipype.pipeline</span> <span class="k">import</span> <span class="n">engine</span> <span class="k">as</span> <span class="n">pe</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="k">import</span> <span class="n">utility</span> <span class="k">as</span> <span class="n">niu</span>
+<span class="c1"># from nipype.interfaces import fsl</span>
+<span class="kn">from</span> <span class="nn">..interfaces.bids</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">ModelSpecLoader</span><span class="p">,</span> <span class="n">LoadBIDSModel</span><span class="p">,</span> <span class="n">BIDSSelect</span><span class="p">,</span> <span class="n">BIDSDataSink</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..interfaces.nistats</span> <span class="k">import</span> <span class="n">FirstLevelModel</span><span class="p">,</span> <span class="n">SecondLevelModel</span>
+<span class="kn">from</span> <span class="nn">..interfaces.visualizations</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">DesignPlot</span><span class="p">,</span> <span class="n">DesignCorrelationPlot</span><span class="p">,</span> <span class="n">ContrastMatrixPlot</span><span class="p">,</span> <span class="n">GlassBrainPlot</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..interfaces.utils</span> <span class="k">import</span> <span class="n">MergeAll</span><span class="p">,</span> <span class="n">CollateWithMetadata</span>
+
+
+<div class="viewcode-block" id="init_fitlins_wf"><a class="viewcode-back" href="../../../api/fitlins.workflows.base.html#fitlins.workflows.base.init_fitlins_wf">[docs]</a><span class="k">def</span> <span class="nf">init_fitlins_wf</span><span class="p">(</span><span class="n">bids_dir</span><span class="p">,</span> <span class="n">derivatives</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">,</span> <span class="n">analysis_level</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span>
+                    <span class="n">desc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">participants</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">ignore</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">smoothing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">base_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;fitlins_wf&#39;</span><span class="p">):</span>
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">base_dir</span><span class="p">)</span>
+
+    <span class="c1"># Find the appropriate model file(s)</span>
+    <span class="n">specs</span> <span class="o">=</span> <span class="n">ModelSpecLoader</span><span class="p">(</span><span class="n">bids_dir</span><span class="o">=</span><span class="n">bids_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">specs</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+
+    <span class="n">model_dict</span> <span class="o">=</span> <span class="n">specs</span><span class="o">.</span><span class="n">run</span><span class="p">()</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">model_spec</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">model_dict</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Unable to find or construct models&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Currently unable to run multiple models in parallel - &quot;</span>
+                           <span class="s2">&quot;please specify model&quot;</span><span class="p">)</span>
+
+    <span class="c1">#</span>
+    <span class="c1"># Load and run the model</span>
+    <span class="c1">#</span>
+
+    <span class="n">loader</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">LoadBIDSModel</span><span class="p">(</span><span class="n">bids_dir</span><span class="o">=</span><span class="n">bids_dir</span><span class="p">,</span>
+                      <span class="n">derivatives</span><span class="o">=</span><span class="n">derivatives</span><span class="p">,</span>
+                      <span class="n">model</span><span class="o">=</span><span class="n">model_dict</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;loader&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ignore</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">loader</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">ignore</span> <span class="o">=</span> <span class="n">ignore</span>
+    <span class="k">if</span> <span class="n">force_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">loader</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">force_index</span> <span class="o">=</span> <span class="n">force_index</span>
+    <span class="k">if</span> <span class="n">participants</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">loader</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">selectors</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">participants</span>
+    <span class="k">if</span> <span class="n">space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">loader</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">selectors</span><span class="p">[</span><span class="s1">&#39;space&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">space</span>
+
+    <span class="c1"># Select preprocessed BOLD series to analyze</span>
+    <span class="n">getter</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">BIDSSelect</span><span class="p">(</span>
+            <span class="n">bids_dir</span><span class="o">=</span><span class="n">bids_dir</span><span class="p">,</span> <span class="n">derivatives</span><span class="o">=</span><span class="n">derivatives</span><span class="p">,</span>
+            <span class="n">selectors</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;bold&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;desc&#39;</span><span class="p">:</span> <span class="n">desc</span><span class="p">,</span>
+                <span class="s1">&#39;space&#39;</span><span class="p">:</span> <span class="n">space</span><span class="p">}),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;getter&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">smoothing</span><span class="p">:</span>
+        <span class="n">smoothing_params</span> <span class="o">=</span> <span class="n">smoothing</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># Convert old style and warn; this should turn into an (informative) error around 0.5.0</span>
+        <span class="k">if</span> <span class="n">smoothing_params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;iso&#39;</span><span class="p">:</span>
+            <span class="n">smoothing_params</span> <span class="o">=</span> <span class="p">(</span><span class="n">smoothing_params</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="n">smoothing_params</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;The format for smoothing arguments has changed. Please use &quot;</span>
+                <span class="n">f</span><span class="s2">&quot;{&#39;:&#39;.join(smoothing_params)} instead of </span><span class="si">{smoothing}</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="ne">FutureWarning</span><span class="p">)</span>
+        <span class="c1"># Add defaults to simplify later logic</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">smoothing_params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">smoothing_params</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;iso&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">smoothing_params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">smoothing_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;iso&#39;</span><span class="p">)</span>
+
+        <span class="n">smoothing_fwhm</span><span class="p">,</span> <span class="n">smoothing_level</span><span class="p">,</span> <span class="n">smoothing_type</span> <span class="o">=</span> <span class="n">smoothing_params</span>
+        <span class="n">smoothing_fwhm</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">smoothing_fwhm</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">smoothing_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;iso&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Unknown smoothing type </span><span class="si">{smoothing_type}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check that smmoothing level exists in model</span>
+        <span class="k">if</span> <span class="n">smoothing_level</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;l&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">smoothing_level</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;Steps&#39;</span><span class="p">]):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Invalid smoothing level </span><span class="si">{smoothing_level}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">smoothing_level</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">step</span><span class="p">[</span><span class="s1">&#39;Level&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                                             <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;Steps&#39;</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Invalid smoothing level </span><span class="si">{smoothing_level}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">l1_model</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">FirstLevelModel</span><span class="p">(),</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;session_info&#39;</span><span class="p">,</span> <span class="s1">&#39;contrast_info&#39;</span><span class="p">,</span> <span class="s1">&#39;bold_file&#39;</span><span class="p">,</span> <span class="s1">&#39;mask_file&#39;</span><span class="p">],</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;l1_model&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_deindex</span><span class="p">(</span><span class="n">tsv</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
+        <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+        <span class="n">out_tsv</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">tsv</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">tsv</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">out_tsv</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out_tsv</span>
+
+    <span class="n">deindex_tsv</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="n">_deindex</span><span class="p">),</span>
+                             <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;tsv&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;deindex_tsv&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Set up common patterns</span>
+    <span class="n">image_pattern</span> <span class="o">=</span> <span class="s1">&#39;reports/[sub-</span><span class="si">{subject}</span><span class="s1">/][ses-</span><span class="si">{session}</span><span class="s1">/]figures/[run-</span><span class="si">{run}</span><span class="s1">/]&#39;</span> \
+        <span class="s1">&#39;[sub-</span><span class="si">{subject}</span><span class="s1">_][ses-</span><span class="si">{session}</span><span class="s1">_]task-</span><span class="si">{task}</span><span class="s1">[_acq-</span><span class="si">{acquisition}</span><span class="s1">]&#39;</span> \
+        <span class="s1">&#39;[_rec-</span><span class="si">{reconstruction}</span><span class="s1">][_run-</span><span class="si">{run}</span><span class="s1">][_echo-</span><span class="si">{echo}</span><span class="s1">]_&#39;</span> \
+        <span class="s1">&#39;{suffix&lt;design|corr|contrasts&gt;}.svg&#39;</span>
+    <span class="n">contrast_plot_pattern</span> <span class="o">=</span> <span class="s1">&#39;reports/[sub-</span><span class="si">{subject}</span><span class="s1">/][ses-</span><span class="si">{session}</span><span class="s1">/]figures/[run-</span><span class="si">{run}</span><span class="s1">/]&#39;</span> \
+        <span class="s1">&#39;[sub-</span><span class="si">{subject}</span><span class="s1">_][ses-</span><span class="si">{session}</span><span class="s1">_]task-</span><span class="si">{task}</span><span class="s1">[_acq-</span><span class="si">{acquisition}</span><span class="s1">]&#39;</span> \
+        <span class="s1">&#39;[_rec-</span><span class="si">{reconstruction}</span><span class="s1">][_run-</span><span class="si">{run}</span><span class="s1">][_echo-</span><span class="si">{echo}</span><span class="s1">][_space-</span><span class="si">{space}</span><span class="s1">]_&#39;</span> \
+        <span class="s1">&#39;contrast-</span><span class="si">{contrast}</span><span class="s1">_stat-{stat&lt;effect|variance|z|p|t|F&gt;}_ortho.png&#39;</span>
+    <span class="n">design_matrix_pattern</span> <span class="o">=</span> <span class="s1">&#39;[sub-</span><span class="si">{subject}</span><span class="s1">/][ses-</span><span class="si">{session}</span><span class="s1">/]&#39;</span> \
+        <span class="s1">&#39;[sub-</span><span class="si">{subject}</span><span class="s1">_][ses-</span><span class="si">{session}</span><span class="s1">_]task-</span><span class="si">{task}</span><span class="s1">[_acq-</span><span class="si">{acquisition}</span><span class="s1">]&#39;</span> \
+        <span class="s1">&#39;[_rec-</span><span class="si">{reconstruction}</span><span class="s1">][_run-</span><span class="si">{run}</span><span class="s1">][_echo-</span><span class="si">{echo}</span><span class="s1">]_{suffix&lt;design&gt;}.tsv&#39;</span>
+    <span class="n">contrast_pattern</span> <span class="o">=</span> <span class="s1">&#39;[sub-</span><span class="si">{subject}</span><span class="s1">/][ses-</span><span class="si">{session}</span><span class="s1">/]&#39;</span> \
+        <span class="s1">&#39;[sub-</span><span class="si">{subject}</span><span class="s1">_][ses-</span><span class="si">{session}</span><span class="s1">_]task-</span><span class="si">{task}</span><span class="s1">[_acq-</span><span class="si">{acquisition}</span><span class="s1">]&#39;</span> \
+        <span class="s1">&#39;[_rec-</span><span class="si">{reconstruction}</span><span class="s1">][_run-</span><span class="si">{run}</span><span class="s1">][_echo-</span><span class="si">{echo}</span><span class="s1">][_space-</span><span class="si">{space}</span><span class="s1">]_&#39;</span> \
+        <span class="s1">&#39;contrast-</span><span class="si">{contrast}</span><span class="s1">_stat-{stat&lt;effect|variance|z|p|t|F&gt;}_statmap.nii.gz&#39;</span>
+
+    <span class="c1"># Set up general interfaces</span>
+    <span class="c1">#</span>
+    <span class="c1"># HTML snippets to be included directly in report, not</span>
+    <span class="c1"># saved as individual derivative files</span>
+    <span class="c1">#</span>
+
+    <span class="n">reportlet_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">base_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s1">&#39;reportlets&#39;</span> <span class="o">/</span> <span class="s1">&#39;fitlins&#39;</span>
+    <span class="n">reportlet_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">snippet_pattern</span> <span class="o">=</span> <span class="s1">&#39;[sub-</span><span class="si">{subject}</span><span class="s1">/][ses-</span><span class="si">{session}</span><span class="s1">/][sub-</span><span class="si">{subject}</span><span class="s1">_]&#39;</span> \
+        <span class="s1">&#39;[ses-</span><span class="si">{session}</span><span class="s1">_]task-</span><span class="si">{task}</span><span class="s1">_[run-</span><span class="si">{run}</span><span class="s1">_]snippet.html&#39;</span>
+    <span class="n">ds_model_warnings</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">BIDSDataSink</span><span class="p">(</span><span class="n">base_directory</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">reportlet_dir</span><span class="p">),</span>
+                     <span class="n">path_patterns</span><span class="o">=</span><span class="n">snippet_pattern</span><span class="p">),</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;entities&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">],</span>
+        <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ds_model_warning&#39;</span><span class="p">)</span>
+
+    <span class="n">plot_design</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">DesignPlot</span><span class="p">(</span><span class="n">image_type</span><span class="o">=</span><span class="s1">&#39;svg&#39;</span><span class="p">),</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;plot_design&#39;</span><span class="p">)</span>
+
+    <span class="n">plot_corr</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">DesignCorrelationPlot</span><span class="p">(</span><span class="n">image_type</span><span class="o">=</span><span class="s1">&#39;svg&#39;</span><span class="p">),</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;contrast_info&#39;</span><span class="p">],</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;plot_corr&#39;</span><span class="p">)</span>
+
+    <span class="n">plot_l1_contrast_matrix</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">ContrastMatrixPlot</span><span class="p">(</span><span class="n">image_type</span><span class="o">=</span><span class="s1">&#39;svg&#39;</span><span class="p">),</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;contrast_info&#39;</span><span class="p">],</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;plot_l1_contrast_matrix&#39;</span><span class="p">)</span>
+
+    <span class="n">ds_design</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">BIDSDataSink</span><span class="p">(</span><span class="n">base_directory</span><span class="o">=</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">fixed_entities</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;design&#39;</span><span class="p">},</span>
+                     <span class="n">path_patterns</span><span class="o">=</span><span class="n">image_pattern</span><span class="p">),</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;entities&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">],</span>
+        <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ds_design&#39;</span><span class="p">)</span>
+
+    <span class="n">ds_design_matrix</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">BIDSDataSink</span><span class="p">(</span><span class="n">base_directory</span><span class="o">=</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">fixed_entities</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;design&#39;</span><span class="p">},</span>
+                     <span class="n">path_patterns</span><span class="o">=</span><span class="n">design_matrix_pattern</span><span class="p">),</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;entities&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">],</span>
+        <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ds_design_matrix&#39;</span><span class="p">)</span>
+
+    <span class="n">ds_corr</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">BIDSDataSink</span><span class="p">(</span><span class="n">base_directory</span><span class="o">=</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">fixed_entities</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;corr&#39;</span><span class="p">},</span>
+                     <span class="n">path_patterns</span><span class="o">=</span><span class="n">image_pattern</span><span class="p">),</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;entities&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">],</span>
+        <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ds_corr&#39;</span><span class="p">)</span>
+
+    <span class="n">ds_l1_contrasts</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">BIDSDataSink</span><span class="p">(</span><span class="n">base_directory</span><span class="o">=</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">fixed_entities</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;contrasts&#39;</span><span class="p">},</span>
+                     <span class="n">path_patterns</span><span class="o">=</span><span class="n">image_pattern</span><span class="p">),</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;entities&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">],</span>
+        <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ds_l1_contrasts&#39;</span><span class="p">)</span>
+
+    <span class="c1">#</span>
+    <span class="c1"># General Connections</span>
+    <span class="c1">#</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+        <span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ds_model_warnings</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;warnings&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">l1_model</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;design_info&#39;</span><span class="p">,</span> <span class="s1">&#39;session_info&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">l1_model</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;mask_files&#39;</span><span class="p">,</span> <span class="s1">&#39;mask_file&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">l1_model</span><span class="p">,</span> <span class="n">plot_design</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;design_matrix&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">l1_model</span><span class="p">,</span> <span class="n">deindex_tsv</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;design_matrix&#39;</span><span class="p">,</span> <span class="s1">&#39;tsv&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">deindex_tsv</span><span class="p">,</span> <span class="n">ds_design_matrix</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">l1_model</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;bold_files&#39;</span><span class="p">,</span> <span class="s1">&#39;bold_file&#39;</span><span class="p">)]),</span>
+        <span class="p">])</span>
+
+    <span class="n">stage</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">l1_model</span>
+    <span class="k">for</span> <span class="n">ix</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">step</span><span class="p">[</span><span class="s1">&#39;Level&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;Steps&#39;</span><span class="p">]):</span>
+        <span class="c1"># Set up elements common across levels</span>
+
+        <span class="c1">#</span>
+        <span class="c1"># Because pybids generates the entire model in one go, we will need</span>
+        <span class="c1"># various helper nodes to select the correct portions of the model</span>
+        <span class="c1">#</span>
+
+        <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;l</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ix</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">smoothing</span> <span class="ow">and</span> <span class="n">smoothing_level</span> <span class="ow">in</span> <span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">smoothing_fwhm</span> <span class="o">=</span> <span class="n">smoothing_fwhm</span>
+
+        <span class="c1"># TODO: No longer used at higher level, suggesting we can simply return</span>
+        <span class="c1"># entities from loader as a single list</span>
+        <span class="n">select_entities</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+            <span class="n">niu</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">ix</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;select_</span><span class="si">{}</span><span class="s1">_entities&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">level</span><span class="p">),</span>
+            <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">select_contrasts</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+            <span class="n">niu</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">ix</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;select_</span><span class="si">{}</span><span class="s1">_contrasts&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">level</span><span class="p">),</span>
+            <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Squash the results of MapNodes that may have generated multiple maps</span>
+        <span class="c1"># into single lists.</span>
+        <span class="c1"># Do the same with corresponding metadata - interface will complain if shapes mismatch</span>
+        <span class="n">collate</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+            <span class="n">MergeAll</span><span class="p">([</span><span class="s1">&#39;effect_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;variance_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;stat_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;zscore_maps&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;pvalue_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;contrast_metadata&#39;</span><span class="p">]),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;collate_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">level</span><span class="p">),</span>
+            <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1">#</span>
+        <span class="c1"># Plotting</span>
+        <span class="c1">#</span>
+
+        <span class="n">plot_contrasts</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+            <span class="n">GlassBrainPlot</span><span class="p">(</span><span class="n">image_type</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">),</span>
+            <span class="n">iterfield</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;plot_</span><span class="si">{}</span><span class="s1">_contrasts&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">level</span><span class="p">))</span>
+
+        <span class="c1">#</span>
+        <span class="c1"># Derivatives</span>
+        <span class="c1">#</span>
+
+        <span class="n">collate_outputs</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+            <span class="n">CollateWithMetadata</span><span class="p">(</span>
+                <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;effect_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;variance_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;stat_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;pvalue_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;zscore_maps&#39;</span><span class="p">],</span>
+                <span class="n">field_to_metadata_map</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s1">&#39;effect_maps&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;stat&#39;</span><span class="p">:</span> <span class="s1">&#39;effect&#39;</span><span class="p">},</span>
+                    <span class="s1">&#39;variance_maps&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;stat&#39;</span><span class="p">:</span> <span class="s1">&#39;variance&#39;</span><span class="p">},</span>
+                    <span class="s1">&#39;pvalue_maps&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;stat&#39;</span><span class="p">:</span> <span class="s1">&#39;p&#39;</span><span class="p">},</span>
+                    <span class="s1">&#39;zscore_maps&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;stat&#39;</span><span class="p">:</span> <span class="s1">&#39;z&#39;</span><span class="p">},</span>
+                <span class="p">}),</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">f</span><span class="s1">&#39;collate_</span><span class="si">{level}</span><span class="s1">_outputs&#39;</span><span class="p">)</span>
+
+        <span class="n">ds_contrast_maps</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+            <span class="n">BIDSDataSink</span><span class="p">(</span><span class="n">base_directory</span><span class="o">=</span><span class="n">out_dir</span><span class="p">,</span>
+                         <span class="n">path_patterns</span><span class="o">=</span><span class="n">contrast_pattern</span><span class="p">),</span>
+            <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ds_</span><span class="si">{}</span><span class="s1">_contrast_maps&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">level</span><span class="p">))</span>
+
+        <span class="n">ds_contrast_plots</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+            <span class="n">BIDSDataSink</span><span class="p">(</span><span class="n">base_directory</span><span class="o">=</span><span class="n">out_dir</span><span class="p">,</span>
+                         <span class="n">path_patterns</span><span class="o">=</span><span class="n">contrast_plot_pattern</span><span class="p">),</span>
+            <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ds_</span><span class="si">{}</span><span class="s1">_contrast_plots&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">level</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">ix</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+                <span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">select_entities</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;entities&#39;</span><span class="p">,</span> <span class="s1">&#39;inlist&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">select_entities</span><span class="p">,</span> <span class="n">getter</span><span class="p">,</span>  <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;entities&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">select_entities</span><span class="p">,</span> <span class="n">ds_model_warnings</span><span class="p">,</span>  <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;entities&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">select_entities</span><span class="p">,</span> <span class="n">ds_design</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;entities&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">select_entities</span><span class="p">,</span> <span class="n">ds_design_matrix</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;entities&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">plot_design</span><span class="p">,</span> <span class="n">ds_design</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;figure&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">select_contrasts</span><span class="p">,</span> <span class="n">plot_l1_contrast_matrix</span><span class="p">,</span>  <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;contrast_info&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">select_contrasts</span><span class="p">,</span> <span class="n">plot_corr</span><span class="p">,</span>  <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;contrast_info&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">plot_l1_contrast_matrix</span><span class="p">,</span>  <span class="p">[(</span><span class="s1">&#39;design_matrix&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">plot_corr</span><span class="p">,</span>  <span class="p">[(</span><span class="s1">&#39;design_matrix&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">select_entities</span><span class="p">,</span> <span class="n">ds_l1_contrasts</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;entities&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">select_entities</span><span class="p">,</span> <span class="n">ds_corr</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;entities&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">plot_l1_contrast_matrix</span><span class="p">,</span> <span class="n">ds_l1_contrasts</span><span class="p">,</span>  <span class="p">[(</span><span class="s1">&#39;figure&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">plot_corr</span><span class="p">,</span> <span class="n">ds_corr</span><span class="p">,</span>  <span class="p">[(</span><span class="s1">&#39;figure&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+            <span class="p">])</span>
+
+        <span class="c1">#  Set up higher levels</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+                <span class="n">SecondLevelModel</span><span class="p">(),</span>
+                <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;contrast_info&#39;</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_model&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">level</span><span class="p">))</span>
+
+            <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+                <span class="p">(</span><span class="n">stage</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;effect_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;effect_maps&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s1">&#39;variance_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;variance_maps&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s1">&#39;contrast_metadata&#39;</span><span class="p">,</span> <span class="s1">&#39;stat_metadata&#39;</span><span class="p">)]),</span>
+            <span class="p">])</span>
+
+        <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+            <span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">select_contrasts</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;contrast_info&#39;</span><span class="p">,</span> <span class="s1">&#39;inlist&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">select_contrasts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span>  <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;contrast_info&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">collate</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;effect_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;effect_maps&#39;</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;variance_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;variance_maps&#39;</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;stat_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;stat_maps&#39;</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;zscore_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;zscore_maps&#39;</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;pvalue_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;pvalue_maps&#39;</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;contrast_metadata&#39;</span><span class="p">,</span> <span class="s1">&#39;contrast_metadata&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">collate</span><span class="p">,</span> <span class="n">collate_outputs</span><span class="p">,</span> <span class="p">[</span>
+                <span class="p">(</span><span class="s1">&#39;contrast_metadata&#39;</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;effect_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;effect_maps&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;variance_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;variance_maps&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;stat_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;stat_maps&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;zscore_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;zscore_maps&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;pvalue_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;pvalue_maps&#39;</span><span class="p">),</span>
+                <span class="p">]),</span>
+            <span class="p">(</span><span class="n">collate</span><span class="p">,</span> <span class="n">plot_contrasts</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;stat_maps&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">collate_outputs</span><span class="p">,</span> <span class="n">ds_contrast_maps</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">),</span>
+                                                 <span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="s1">&#39;entities&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">collate</span><span class="p">,</span> <span class="n">ds_contrast_plots</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;contrast_metadata&#39;</span><span class="p">,</span> <span class="s1">&#39;entities&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">plot_contrasts</span><span class="p">,</span> <span class="n">ds_contrast_plots</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;figure&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+
+            <span class="p">])</span>
+
+        <span class="n">stage</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="n">analysis_level</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">wf</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">FitLins</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model.html">BIDS Stats Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing FitLins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Center for Reproducible Neuroscience.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

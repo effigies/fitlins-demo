@@ -1,0 +1,17 @@
+fitlins.cli package
+===================
+
+Submodules
+----------
+
+.. toctree::
+
+   fitlins.cli.run
+
+Module contents
+---------------
+
+.. automodule:: fitlins.cli
+    :members:
+    :undoc-members:
+    :show-inheritance:

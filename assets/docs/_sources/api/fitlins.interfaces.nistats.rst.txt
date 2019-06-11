@@ -1,0 +1,7 @@
+fitlins.interfaces.nistats module
+=================================
+
+.. automodule:: fitlins.interfaces.nistats
+    :members:
+    :undoc-members:
+    :show-inheritance:

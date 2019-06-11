@@ -1,0 +1,40 @@
+.. _gallery_examples_notebooks:
+
+Notebooks
+=========
+
+The Jupyter_ notebooks here are intended to orient users to FitLins.
+At present, there is a notebook that demonstrates installing a dataset from
+Datalad_ and running FitLins on it.
+
+
+.. _Jupyter: https://jupyter.org/
+.. _Datalad: https://www.datalad.org/
+
+
+
+.. toctree::
+    :maxdepth: 1
+
+    ds003_sample_analysis
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbContainer" tooltip="This document demonstrates the command line to run a FitLins analysis.">
+
+.. only:: html
+
+    .. figure:: /examples/notebooks/images/thumb/gallery_examples_notebooks_ds003_sample_analysis.ipynb_thumb.png
+
+        :ref:`gallery_examples_notebooks_ds003_sample_analysis.ipynb`
+
+.. raw:: html
+
+    </div>
+
+
+.. raw:: html
+
+    <div style='clear:both'></div>
+

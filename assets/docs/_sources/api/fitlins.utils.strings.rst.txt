@@ -1,0 +1,7 @@
+fitlins.utils.strings module
+============================
+
+.. automodule:: fitlins.utils.strings
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,250 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>BIDS Stats Models &#8212; FitLins  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/example_gallery_styles.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="examples/index.html" />
+    <link rel="prev" title="Usage" href="usage.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="id1">
+<h1>BIDS Stats Models<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p>FitLins is a consumer of model specifications written according to the
+<a class="reference external" href="https://docs.google.com/document/d/1bq5eNDHTb6Nkx3WUiOBgKvLNnaa5OMcGtD0AZ9yms2M/">BIDS Stats Models</a> draft standard.
+A model is a <a class="reference external" href="https://json.org/">JSON</a> document of the following layout:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">{</span>
+<span class="nt">  &quot;Name&quot;</span><span class="p">:</span> <span class="s">&quot;two_condition&quot;</span><span class="p p-Indicator">,</span>
+<span class="nt">  &quot;Description&quot;</span><span class="p">:</span> <span class="s">&quot;A</span><span class="nv"> </span><span class="s">simple,</span><span class="nv"> </span><span class="s">two-condition</span><span class="nv"> </span><span class="s">contrast&quot;</span><span class="p p-Indicator">,</span>
+<span class="nt">  &quot;Input&quot;</span><span class="p">:</span> <span class="p p-Indicator">{</span>
+<span class="nt">    &quot;task&quot;</span><span class="p">:</span> <span class="s">&quot;motor&quot;</span>
+    <span class="p p-Indicator">},</span>
+<span class="nt">  &quot;Steps&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span>
+    <span class="p p-Indicator">{</span>
+<span class="nt">      &quot;Level&quot;</span><span class="p">:</span> <span class="s">&quot;Run&quot;</span><span class="p p-Indicator">,</span>
+      <span class="nv">...</span>
+    <span class="p p-Indicator">},</span>
+    <span class="p p-Indicator">{</span>
+<span class="nt">      &quot;Level&quot;</span><span class="p">:</span> <span class="s">&quot;Session&quot;</span><span class="p p-Indicator">,</span>
+      <span class="nv">...</span>
+    <span class="p p-Indicator">},</span>
+    <span class="p p-Indicator">{</span>
+<span class="nt">      &quot;Level&quot;</span><span class="p">:</span> <span class="s">&quot;Subject&quot;</span><span class="p p-Indicator">,</span>
+      <span class="nv">...</span>
+    <span class="p p-Indicator">},</span>
+    <span class="p p-Indicator">{</span>
+<span class="nt">      &quot;Level&quot;</span><span class="p">:</span> <span class="s">&quot;Dataset&quot;</span><span class="p p-Indicator">,</span>
+      <span class="nv">...</span>
+    <span class="p p-Indicator">}</span>
+  <span class="p p-Indicator">]</span>
+<span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p>The optional <code class="docutils literal notranslate"><span class="pre">Input</span></code> section is a series of <em>selectors</em>, or BIDS key/value pairs
+that describe the BOLD files that are required for the model.
+The heart of the model is the <code class="docutils literal notranslate"><span class="pre">Steps</span></code> section, which correspond to levels of analysis,
+and can be specified at any BIDS-App level, <em>i.e.</em>, <code class="docutils literal notranslate"><span class="pre">Run</span></code>, <code class="docutils literal notranslate"><span class="pre">Session</span></code>, <code class="docutils literal notranslate"><span class="pre">Subject</span></code>
+or <code class="docutils literal notranslate"><span class="pre">Dataset</span></code>.</p>
+<p>The first step (typically <code class="docutils literal notranslate"><span class="pre">Run</span></code>) implicitly ingests BOLD series as input images, along
+with associated variables:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://bids-specification.readthedocs.io/en/stable/04-modality-specific-files/05-task-events.html">Task events</a> with onsets and durations, defined in <code class="docutils literal notranslate"><span class="pre">events.tsv</span></code> files</p></li>
+<li><p><a class="reference external" href="https://bids-specification.readthedocs.io/en/stable/04-modality-specific-files/06-physiological-and-other-continous-recordings.html">Physiological recordings</a> or stimuli taken during the scan, defined in
+<code class="docutils literal notranslate"><span class="pre">physio.tsv.gz</span></code> and <code class="docutils literal notranslate"><span class="pre">stim.tsv.gz</span></code> files, respectively</p></li>
+<li><p><a class="reference external" href="https://bids-specification.readthedocs.io/en/derivatives/05-derivatives/04-functional-derivatives.html#time-series">Time series</a> with one data point per volume, such as confound regressors
+found in <code class="docutils literal notranslate"><span class="pre">desc-confounds_regressors.tsv</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>These variables can be transformed and combined into a design matrix.
+For example, supposing you have an <code class="docutils literal notranslate"><span class="pre">events.tsv</span></code> with a <code class="docutils literal notranslate"><span class="pre">trial_type</span></code> column
+that can take the values <code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">B</span></code>, and you want to contrast <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">-</span> <span class="pre">B</span></code> with
+24-parameter motion confounds:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">{</span>
+<span class="nt">  &quot;Level&quot;</span><span class="p">:</span> <span class="s">&quot;Run&quot;</span><span class="p p-Indicator">,</span>
+<span class="nt">  &quot;Transformations&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span>
+    <span class="p p-Indicator">{</span>
+<span class="nt">      &quot;Name&quot;</span><span class="p">:</span> <span class="s">&quot;Factor&quot;</span><span class="p p-Indicator">,</span>
+<span class="nt">      &quot;Inputs&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;trial_type&quot;</span><span class="p p-Indicator">]</span>
+    <span class="p p-Indicator">},</span>
+    <span class="p p-Indicator">{</span>
+<span class="nt">      &quot;Name&quot;</span><span class="p">:</span> <span class="s">&quot;Convolve&quot;</span><span class="p p-Indicator">,</span>
+<span class="nt">      &quot;Model&quot;</span><span class="p">:</span> <span class="s">&quot;spm&quot;</span>
+<span class="nt">      &quot;Inputs&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;trial_type.A&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;trial_type.B&quot;</span><span class="p p-Indicator">]</span>
+    <span class="p p-Indicator">},</span>
+    <span class="p p-Indicator">{</span>
+<span class="nt">      &quot;Name&quot;</span><span class="p">:</span> <span class="s">&quot;Lag&quot;</span><span class="p p-Indicator">,</span>
+<span class="nt">      &quot;Inputs&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;rot_x&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;rot_y&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;rot_z&quot;</span><span class="p p-Indicator">,</span>
+                 <span class="s">&quot;trans_x&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;trans_y&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;trans_z&quot;</span><span class="p p-Indicator">],</span>
+<span class="nt">      &quot;Outputs&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;d_rot_x&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_rot_y&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_rot_z&quot;</span><span class="p p-Indicator">,</span>
+                  <span class="s">&quot;d_trans_x&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_trans_y&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_trans_z&quot;</span><span class="p p-Indicator">]</span>
+    <span class="p p-Indicator">},</span>
+    <span class="p p-Indicator">{</span>
+<span class="nt">      &quot;Name&quot;</span><span class="p">:</span> <span class="s">&quot;Power&quot;</span><span class="p p-Indicator">,</span>
+<span class="nt">      &quot;Order&quot;</span><span class="p">:</span> <span class="nv">2</span><span class="p p-Indicator">,</span>
+<span class="nt">      &quot;Inputs&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;rot_x&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;rot_y&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;rot_z&quot;</span><span class="p p-Indicator">,</span>
+                 <span class="s">&quot;trans_x&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;trans_y&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;trans_z&quot;</span><span class="p p-Indicator">,</span>
+                 <span class="s">&quot;d_rot_x&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_rot_y&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_rot_z&quot;</span><span class="p p-Indicator">,</span>
+                 <span class="s">&quot;d_trans_x&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_trans_y&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_trans_z&quot;</span><span class="p p-Indicator">],</span>
+<span class="nt">      &quot;Outputs&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;rot_x_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;rot_y_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;rot_z_2&quot;</span><span class="p p-Indicator">,</span>
+                  <span class="s">&quot;trans_x_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;trans_y_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;trans_z_2&quot;</span><span class="p p-Indicator">,</span>
+                  <span class="s">&quot;d_rot_x_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_rot_y_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_rot_z_2&quot;</span><span class="p p-Indicator">,</span>
+                  <span class="s">&quot;d_trans_x_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_trans_y_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_trans_z_2&quot;</span><span class="p p-Indicator">]</span>
+    <span class="p p-Indicator">}</span>
+  <span class="p p-Indicator">],</span>
+<span class="nt">  &quot;X&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span>
+    <span class="s">&quot;trial_type.A&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;trial_type.B&quot;</span><span class="p p-Indicator">,</span>
+    <span class="s">&quot;rot_x&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;rot_y&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;rot_z&quot;</span><span class="p p-Indicator">,</span>
+    <span class="s">&quot;trans_x&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;trans_y&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;trans_z&quot;</span><span class="p p-Indicator">,</span>
+    <span class="s">&quot;d_rot_x&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_rot_y&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_rot_z&quot;</span><span class="p p-Indicator">,</span>
+    <span class="s">&quot;d_trans_x&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_trans_y&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_trans_z&quot;</span><span class="p p-Indicator">,</span>
+    <span class="s">&quot;rot_x_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;rot_y_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;rot_z_2&quot;</span><span class="p p-Indicator">,</span>
+    <span class="s">&quot;trans_x_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;trans_y_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;trans_z_2&quot;</span><span class="p p-Indicator">,</span>
+    <span class="s">&quot;d_rot_x_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_rot_y_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_rot_z_2&quot;</span><span class="p p-Indicator">,</span>
+    <span class="s">&quot;d_trans_x_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_trans_y_2&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;d_trans_z_2&quot;</span><span class="p p-Indicator">],</span>
+<span class="nt">  &quot;Contrasts&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span>
+    <span class="p p-Indicator">{</span>
+<span class="nt">      &quot;Name&quot;</span><span class="p">:</span> <span class="s">&quot;a_vs_b&quot;</span><span class="p p-Indicator">,</span>
+<span class="nt">      &quot;ConditionList&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;trial_type.A&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;trial_type.B&quot;</span><span class="p p-Indicator">],</span>
+<span class="nt">      &quot;Type&quot;</span><span class="p">:</span> <span class="s">&quot;t&quot;</span><span class="p p-Indicator">,</span>
+<span class="nt">      &quot;Weights&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span> <span class="nv">-1</span><span class="p p-Indicator">]</span>
+    <span class="p p-Indicator">}</span>
+  <span class="p p-Indicator">]</span>
+<span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">X</span></code> refers to the design matrix (in the sense of <span class="math notranslate nohighlight">\(\mathbf Y = \mathbf{XB} + \epsilon\)</span>),
+and should include your <em>variables of interest</em> and your <em>nuisance regressors</em>.
+While all variables found in your BIDS dataset will be available, only those explicitly
+listed will be fit.
+The output of this level will be statistical maps for the contrast <code class="docutils literal notranslate"><span class="pre">a_vs_b</span></code>, which
+will now be available to the next step.</p>
+<p>For this contrast, we may want to simply run a basic <span class="math notranslate nohighlight">\(t\)</span>-test at the group level.
+In this case, we can use an <code class="docutils literal notranslate"><span class="pre">AutoContrast</span></code> to make a very simple final step:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">{</span>
+<span class="nt">  &quot;Level&quot;</span><span class="p">:</span> <span class="s">&quot;Dataset&quot;</span><span class="p p-Indicator">,</span>
+<span class="nt">  &quot;AutoContrasts&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;a_vs_b&quot;</span><span class="p p-Indicator">]</span>
+<span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p>This is equivalent to the more verbose:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">{</span>
+<span class="nt">  &quot;Level&quot;</span><span class="p">:</span> <span class="s">&quot;Dataset&quot;</span><span class="p p-Indicator">,</span>
+<span class="nt">  &quot;Contrasts&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span>
+    <span class="p p-Indicator">{</span>
+<span class="nt">      &quot;Name&quot;</span><span class="p">:</span> <span class="s">&quot;a_vs_b&quot;</span><span class="p p-Indicator">,</span>
+<span class="nt">      &quot;ConditionList&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;a_vs_b&quot;</span><span class="p p-Indicator">],</span>
+<span class="nt">      &quot;Type&quot;</span><span class="p">:</span> <span class="s">&quot;t&quot;</span><span class="p p-Indicator">,</span>
+<span class="nt">      &quot;Weights&quot;</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">]</span>
+    <span class="p p-Indicator">}</span>
+  <span class="p p-Indicator">]</span>
+<span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p>The output of this level will again be a statistical map for the contrast <code class="docutils literal notranslate"><span class="pre">a_vs_b</span></code>,
+but summarized across the whole group.</p>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">FitLins</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">BIDS Stats Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing FitLins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="usage.html" title="previous chapter">Usage</a></li>
+      <li>Next: <a href="examples/index.html" title="next chapter">Examples</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Center for Reproducible Neuroscience.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/model.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

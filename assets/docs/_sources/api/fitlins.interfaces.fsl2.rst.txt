@@ -1,0 +1,7 @@
+fitlins.interfaces.fsl2 module
+==============================
+
+.. automodule:: fitlins.interfaces.fsl2
+    :members:
+    :undoc-members:
+    :show-inheritance:
