@@ -101,9 +101,9 @@ The initial summary describes the model metadata and inputs.
 
 ### Design matrix
 
-<p align="center">
-<img src="assets/docs/_images/sub-01_task-rhymejudgment_design.svg" width="80%">
-</p>
+.center[
+![:img , 80%](./assets/docs/_images/sub-01_task-rhymejudgment_design.svg)
+]
 
 ---
 
